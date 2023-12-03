@@ -24,6 +24,9 @@ export class BaseScene extends Phaser.Scene {
 
   canX(ratio: number = 1.0): number { return this.sys.game.canvas.width * ratio }
   canY(ratio: number = 1.0): number { return this.sys.game.canvas.height * ratio }
+  canXY(ratiox: number, ratioy: number | null = null): [number, number] {
+    return [this.canX(ratiox), this.canY(ratioy || ratiox)];
+  }
   fps(): number { return this.game.config.fps.target!; }
 
   sprites: { [key: string]: Phaser.GameObjects.Sprite } = {};
