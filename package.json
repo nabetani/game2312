@@ -9,6 +9,7 @@
   "author": "NABETANI Takenori",
   "license": "MIT",
   "dependencies": {
+    "eslint": "^8.55.0",
     "phaser": "^3.60.0"
   },
   "devDependencies": {
