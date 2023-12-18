@@ -15,7 +15,8 @@ import { Model } from './model';
 
 type Phase = StartPhase | GamePhase;
 
-const ZP = 1.12;
+const ZP = 1.12; // ジャンプや落下の拡大縮小係数
+const PY = 500; // プレイヤーの表示 Y 座標
 
 class StartPhase {
   scene: GameMain;
@@ -83,22 +84,23 @@ export class GameMain extends BaseScene {
     const m = this.model;
     m.updatePlayer();
     const p = m.player;
-    this.sprites.p0.setPosition(p.pos.x, p.pos.y);
+    this.sprites.p0.setPosition(p.pos.x, PY);
     this.sprites.p0.setAngle(p.angle);
     this.sprites.p0.setScale(Math.pow(ZP, p.z));
   }
 
   updateLotuses() {
     const m = this.model;
+    const dy = PY - m.player.pos.y;
     m.updateLotuses();
     for (let i = 0; i < m.lotuses.length; i++) {
       const o = this.model.lotuses[i];
       if (this.lotuses.length <= i) {
-        this.lotuses.push(this.add.sprite(o.pos.x, o.pos.y, "lotus").setDepth(depth.lotus));
+        this.lotuses.push(this.add.sprite(o.pos.x, dy + o.pos.y, "lotus").setDepth(depth.lotus));
       }
       const s = this.lotuses[i];
       s.setScale(o.scale * Math.pow(ZP, o.z));
-      s.setPosition(o.pos.x, o.pos.y);
+      s.setPosition(o.pos.x, dy + o.pos.y);
       if (o.life < 1) {
         s.getBounds();
       }
