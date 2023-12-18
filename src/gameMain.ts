@@ -13,8 +13,9 @@ import { Model } from './model';
  距離がスコア。
  */
 
-
 type Phase = StartPhase | GamePhase;
+
+const ZP = 1.12;
 
 class StartPhase {
   scene: GameMain;
@@ -47,12 +48,15 @@ const depth = {
 };
 
 export class GameMain extends BaseScene {
-  model: Model = new Model()
+  model: Model;
   phase: Phase = new StartPhase(this)
   arrows: Phaser.GameObjects.Sprite[] = [];
   lotuses: Phaser.GameObjects.Sprite[] = [];
 
-  constructor() { super("GameMain") }
+  constructor() {
+    super("GameMain")
+    this.model = new Model()
+  }
   preload() {
     this.loadImages({
       bg: "bg.webp",
@@ -81,7 +85,7 @@ export class GameMain extends BaseScene {
     const p = m.player;
     this.sprites.p0.setPosition(p.pos.x, p.pos.y);
     this.sprites.p0.setAngle(p.angle);
-    this.sprites.p0.setScale(Math.pow(1.13, p.z));
+    this.sprites.p0.setScale(Math.pow(ZP, p.z));
   }
 
   updateLotuses() {
@@ -93,14 +97,10 @@ export class GameMain extends BaseScene {
         this.lotuses.push(this.add.sprite(o.pos.x, o.pos.y, "lotus").setDepth(depth.lotus));
       }
       const s = this.lotuses[i];
-      if (o.isLiving) {
-        s.setScale(o.scale);
-        s.setPosition(o.pos.x, o.pos.y);
-        if (o.life < 1) {
-          s.getBounds();
-        }
-      } else {
-        s.setVisible(false);
+      s.setScale(o.scale * Math.pow(ZP, o.z));
+      s.setPosition(o.pos.x, o.pos.y);
+      if (o.life < 1) {
+        s.getBounds();
       }
     }
   }

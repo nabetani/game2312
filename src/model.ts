@@ -25,15 +25,13 @@ class Lotus {
   _pos: Vector2;
   _scale: number;
   _life: number;
+  z: number = 0;
   get isLiving(): boolean { return 0 < this._life; }
   get pos(): Vector2 { return this._pos; }
   get scale(): number { return this._scale; }
   get life(): number { return this._life; }
   decHP() { --this._life; }
   hit(p: Vector2) {
-    if (!this.isLiving) {
-      return false;
-    }
     const d2 = this.pos.distanceSq(p);
     const r = 60;
     return d2 < r * r * this.scale * this.scale;
@@ -83,10 +81,17 @@ export class Model {
     } else {
       const lotus = this.lotusWithPlayerOnIt();
       if (lotus) {
-        lotus.decHP();
-        console.log(`Waiting: z=${this.player.z}`)
-        this.player.z = 0;
-        this.player.zVel = 0;
+        if (lotus.isLiving) {
+          lotus.decHP();
+          console.log(`Waiting: z=${this.player.z}`)
+          this.player.z = 0;
+          this.player.zVel = 0;
+        } else {
+          console.log(`Falling with lotus: z=${this.player.z}`)
+          this.player.z += this.player.zVel;
+          lotus.z = this.player.z;
+          this.player.zVel -= 0.03
+        }
       } else {
         console.log(`Falling: z=${this.player.z}`)
         this.player.z += this.player.zVel;
