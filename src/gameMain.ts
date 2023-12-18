@@ -34,9 +34,17 @@ class GamePhase {
   progress(): Phase {
     this.scene.updateArrows();
     this.scene.updatePlayer();
+    this.scene.updateLotuses();
     return this
   }
 }
+
+const depth = {
+  "bg": 0,
+  "lotus": 100,
+  "arrow": 200,
+  "player": 1000,
+};
 
 export class GameMain extends BaseScene {
   model: Model = new Model()
@@ -56,15 +64,16 @@ export class GameMain extends BaseScene {
   }
   create() {
     console.log("create GameMain")
-    this.add.image(...this.canXY(0.5), 'bg');
+    this.add.image(...this.canXY(0.5), 'bg').setDepth(depth.bg);
     for (let i = 0; i < 8; i++) {
       const x = ((i % 4) * 2 + 1) * 512 / 8;
       const y = 800 - Math.floor(i / 4) * 120;
-      const s = this.add.sprite(x, y, "arrow");
+      const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);;
       this.arrows.push(s);
       s.on('pointerdown', () => { this.model.arrowClick(i); }).setInteractive();
     }
-    this.addSprite(-100, -100, "p0", "p0");
+    this.addSprite(-100, -100, "p0", "p0")
+    this.sprites.p0.setDepth(depth.player);
   }
   updatePlayer() {
     const m = this.model;
@@ -72,25 +81,26 @@ export class GameMain extends BaseScene {
     const p = m.player;
     this.sprites.p0.setPosition(p.pos.x, p.pos.y);
     this.sprites.p0.setAngle(p.angle);
-    this.sprites.p0.setScale(Math.max(0, p.z / 5) + 1);
+    this.sprites.p0.setScale(Math.pow(1.13, p.z));
   }
 
   updateLotuses() {
     const m = this.model;
-    const lotus = this.sprites.lotus;
     m.updateLotuses();
     for (let i = 0; i < m.lotuses.length; i++) {
       const o = this.model.lotuses[i];
-      const s = this.lotuses.length <= i
-        ? this.add.sprite(o.pos().x, o.pos().y, "lotus")
-        : this.lotuses[i];
-      if (o.life() <= 0) {
-      } else {
-        s.setScale(o.scale());
-        s.setPosition(o.pos().x, o.pos().y);
-        if (o.life() < 1) {
+      if (this.lotuses.length <= i) {
+        this.lotuses.push(this.add.sprite(o.pos.x, o.pos.y, "lotus").setDepth(depth.lotus));
+      }
+      const s = this.lotuses[i];
+      if (o.isLiving) {
+        s.setScale(o.scale);
+        s.setPosition(o.pos.x, o.pos.y);
+        if (o.life < 1) {
           s.getBounds();
         }
+      } else {
+        s.setVisible(false);
       }
     }
   }

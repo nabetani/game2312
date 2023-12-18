@@ -16,19 +16,28 @@ class Player {
 };
 
 class Lotus {
-  constructor(p: Vector2, s: number, life: number) {
+  get LIFE_MAX() { return 60 * 2; /* 2秒 */ }
+  constructor(p: Vector2, s: number) {
     this._pos = p;
     this._scale = s;
-    this._life = life;
+    this._life = this.LIFE_MAX;
   }
   _pos: Vector2;
   _scale: number;
   _life: number;
-  pos(): Vector2 { return this._pos; }
-  scale(): number { return this._scale; }
-  life(): number { return this._life; }
-
-  progress() { }
+  get isLiving(): boolean { return 0 < this._life; }
+  get pos(): Vector2 { return this._pos; }
+  get scale(): number { return this._scale; }
+  get life(): number { return this._life; }
+  decHP() { --this._life; }
+  hit(p: Vector2) {
+    if (!this.isLiving) {
+      return false;
+    }
+    const d2 = this.pos.distanceSq(p);
+    const r = 60;
+    return d2 < r * r * this.scale * this.scale;
+  }
 };
 
 export class Model {
@@ -38,7 +47,13 @@ export class Model {
     return Math.sin(this.arrowsX[i]) * 90;
   }
   player: Player = new Player();
-  lotuses: Lotus[] = [new Lotus(v2(256, 700), 4, 1)];
+  lotuses: Lotus[] = [
+    new Lotus(v2(256, 700), 3.5),
+    new Lotus(v2(340, 400), 2),
+    new Lotus(v2(170, 300), 2),
+    new Lotus(v2(370, 200), 1.5),
+    new Lotus(v2(140, 100), 1.5),
+  ];
 
   pointerup() { }
   pointerdown() { }
@@ -51,16 +66,33 @@ export class Model {
     console.log(this.arrowAngle(i));
   }
   updateLotuses() { }
-  updatePlayer() {
-    console.log("z=", this.player.z);
-    if (this.player.z <= 0) {
-      return;
+  lotusWithPlayerOnIt() {
+    for (let lo of this.lotuses) {
+      if (lo.hit(this.player.pos)) { return lo; }
     }
-    this.player.z += this.player.zVel;
-    this.player.zVel -= 0.03
-    const t = (this.player.angle - 90) * (Math.PI / 180);
-    this.player.pos.x += Math.cos(t) * this.player.vel;
-    this.player.pos.y += Math.sin(t) * this.player.vel;
+    return null;
+  }
+  updatePlayer() {
+    if (0 < this.player.z) {
+      console.log(`Jumping: z=${this.player.z}`)
+      this.player.z += this.player.zVel;
+      this.player.zVel -= 0.03
+      const t = (this.player.angle - 90) * (Math.PI / 180);
+      this.player.pos.x += Math.cos(t) * this.player.vel;
+      this.player.pos.y += Math.sin(t) * this.player.vel;
+    } else {
+      const lotus = this.lotusWithPlayerOnIt();
+      if (lotus) {
+        lotus.decHP();
+        console.log(`Waiting: z=${this.player.z}`)
+        this.player.z = 0;
+        this.player.zVel = 0;
+      } else {
+        console.log(`Falling: z=${this.player.z}`)
+        this.player.z += this.player.zVel;
+        this.player.zVel -= 0.03
+      }
+    }
   }
   updateArrows() {
     for (let i = 0; i < this.arrowsV.length; i++) {
