@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { Rng } from './rng';
 
 type Vector2 = Phaser.Math.Vector2;
 const Vector2 = Phaser.Math.Vector2;
@@ -45,18 +46,22 @@ export class Model {
     return Math.sin(this.arrowsX[i]) * 90;
   }
   player: Player = new Player();
-  lotuses: Lotus[] = [
-    new Lotus(v2(256, 700), 3.5),
-    new Lotus(v2(340, 400), 2),
-    new Lotus(v2(170, 300), 2),
-    new Lotus(v2(370, 200), 1.5),
-    new Lotus(v2(140, 100), 1.5),
-  ];
-
+  rng: Rng;
+  lotuses: Lotus[];
+  constructor() {
+    this.rng = new Rng(0);
+    this.lotuses = [new Lotus(v2(256, 700), 3.5)];
+    for (let i = 0; i < 20; ++i) {
+      const x = 256 + this.rng.plusMinusF(200);
+      const y = 400 - i * 200;
+      const s = 1.5 + this.rng.plusMinusF(0.7);
+      this.lotuses.push(new Lotus(v2(x, y), s));
+    }
+  }
   pointerup() { }
   pointerdown() { }
   arrowClick(i: integer) {
-    if (this.player.z <= 0) {
+    if (this.player.z == 0) {
       this.player.angle = this.arrowAngle(i);
       this.player.z = 0.01;
       this.player.zVel = 1
