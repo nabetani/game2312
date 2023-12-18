@@ -8,11 +8,27 @@ const v2 = (x: number, y: number): Vector2 => {
 
 class Player {
   state: string = "";
-  pos: Vector2 = v2(200, 500);
+  pos: Vector2 = v2(256, 550);
   vel: number = 3;
   z: number = 0;
   zVel: number = 0;
   angle: number = 0;
+};
+
+class Lotus {
+  constructor(p: Vector2, s: number, life: number) {
+    this._pos = p;
+    this._scale = s;
+    this._life = life;
+  }
+  _pos: Vector2;
+  _scale: number;
+  _life: number;
+  pos(): Vector2 { return this._pos; }
+  scale(): number { return this._scale; }
+  life(): number { return this._life; }
+
+  progress() { }
 };
 
 export class Model {
@@ -22,6 +38,7 @@ export class Model {
     return Math.sin(this.arrowsX[i]) * 90;
   }
   player: Player = new Player();
+  lotuses: Lotus[] = [new Lotus(v2(256, 700), 4, 1)];
 
   pointerup() { }
   pointerdown() { }
@@ -33,6 +50,7 @@ export class Model {
     }
     console.log(this.arrowAngle(i));
   }
+  updateLotuses() { }
   updatePlayer() {
     console.log("z=", this.player.z);
     if (this.player.z <= 0) {
