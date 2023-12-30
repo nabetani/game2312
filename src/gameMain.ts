@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
 import { BaseScene, Audio } from './baseScene';
-import { Model } from './model';
+import { Model, Lotus } from './model';
 
 /*
  縦スクロール
@@ -17,6 +17,7 @@ type Phase = StartPhase | GamePhase;
 
 const ZP = 1.12; // ジャンプや落下の拡大縮小係数
 const PY = 500; // プレイヤーの表示 Y 座標
+const GAGE_COUNT = 30;
 
 class StartPhase {
   scene: GameMain;
@@ -45,6 +46,7 @@ const depth = {
   "bg": 0,
   "lotus": 100,
   "arrow": 200,
+  "gage": 201,
   "player": 1000,
 };
 
@@ -52,6 +54,7 @@ export class GameMain extends BaseScene {
   model: Model;
   phase: Phase = new StartPhase(this)
   arrows: Phaser.GameObjects.Sprite[] = [];
+  gages: Phaser.GameObjects.Sprite[] = [];
   lotuses: Phaser.GameObjects.Sprite[] = [];
 
   constructor() {
@@ -65,6 +68,7 @@ export class GameMain extends BaseScene {
       p0: "p0.webp",
       p1: "p1.webp",
       lotus: "lotus.webp",
+      gage: "lotus.webp",
     });
   }
   create() {
@@ -76,6 +80,11 @@ export class GameMain extends BaseScene {
       const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);;
       this.arrows.push(s);
       s.on('pointerdown', () => { this.model.arrowClick(i); }).setInteractive();
+    }
+    for (let i = 0; i < GAGE_COUNT; ++i) {
+      const s = this.add.sprite(0, 0, "gage").setDepth(depth.gage);;
+      s.setScale(1 / 8);
+      this.gages.push(s);
     }
     this.addSprite(-100, -100, "p0", "p0")
     this.sprites.p0.setDepth(depth.player);
@@ -89,10 +98,33 @@ export class GameMain extends BaseScene {
     this.sprites.p0.setScale(Math.pow(ZP, p.z));
   }
 
+  drawLotusGauge(lotus: Lotus | null) {
+    const r = lotus?.radius;
+    const p = lotus ? this.dispPos(this.model, lotus.pos) : null;
+    for (let i = 0; i < GAGE_COUNT; ++i) {
+      const g = this.gages[i];
+      if (lotus && lotus.life < i / GAGE_COUNT) {
+        const t = i * Math.PI * 2 / GAGE_COUNT;
+        const x = p!.x + r! * Math.cos(t);
+        const y = p!.y + r! * Math.sin(t);
+        g.setPosition(x, y);
+        g.setVisible(true);
+      } else {
+        g.setVisible(false);
+      }
+    }
+  }
+
+  dispPos(m: Model, p: Phaser.Math.Vector2): Phaser.Math.Vector2 {
+    const dy = PY - m.player.pos.y;
+    return new Phaser.Math.Vector2(p.x, p.y + dy);
+  }
+
   updateLotuses() {
     const m = this.model;
     const dy = PY - m.player.pos.y;
     m.updateLotuses();
+    this.drawLotusGauge(m.lotusPlayerIsOn);
     for (let i = 0; i < m.lotuses.length; i++) {
       const o = this.model.lotuses[i];
       if (this.lotuses.length <= i) {
@@ -101,9 +133,6 @@ export class GameMain extends BaseScene {
       const s = this.lotuses[i];
       s.setScale(o.scale * Math.pow(ZP, o.z));
       s.setPosition(o.pos.x, dy + o.pos.y);
-      if (o.life < 1) {
-        s.getBounds();
-      }
     }
   }
 

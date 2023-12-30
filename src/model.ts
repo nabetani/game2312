@@ -16,7 +16,7 @@ class Player {
   angle: number = 0;
 };
 
-class Lotus {
+export class Lotus {
   get LIFE_MAX() { return 60 * 2; /* 2秒 */ }
   constructor(p: Vector2, s: number) {
     this._pos = p;
@@ -30,12 +30,13 @@ class Lotus {
   get isLiving(): boolean { return 0 < this._life; }
   get pos(): Vector2 { return this._pos; }
   get scale(): number { return this._scale; }
-  get life(): number { return this._life; }
+  get radius(): number { return this.scale * 60; }
+  get life(): number { return this._life / this.LIFE_MAX; }
   decHP() { --this._life; }
   hit(p: Vector2) {
     const d2 = this.pos.distanceSq(p);
-    const r = 60;
-    return d2 < r * r * this.scale * this.scale;
+    const r = this.radius;
+    return d2 < r * r;
   }
 };
 
@@ -69,7 +70,8 @@ export class Model {
     console.log(this.arrowAngle(i));
   }
   updateLotuses() { }
-  lotusWithPlayerOnIt() {
+
+  get lotusPlayerIsOn(): (Lotus | null) {
     for (let lo of this.lotuses) {
       if (lo.hit(this.player.pos)) { return lo; }
     }
@@ -84,7 +86,7 @@ export class Model {
       this.player.pos.x += Math.cos(t) * this.player.vel;
       this.player.pos.y += Math.sin(t) * this.player.vel;
     } else {
-      const lotus = this.lotusWithPlayerOnIt();
+      const lotus = this.lotusPlayerIsOn;
       if (lotus) {
         if (lotus.isLiving) {
           lotus.decHP();
