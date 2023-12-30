@@ -6,7 +6,11 @@ const Vector2 = Phaser.Math.Vector2;
 const v2 = (x: number, y: number): Vector2 => {
   return new Vector2(x, y);
 }
-
+const internalDivision = (p: Vector2, q: Vector2, d: number): Vector2 => {
+  return v2(
+    p.x * d + q.x * (1 - d),
+    p.y * d + q.y * (1 - d));
+}
 class Player {
   state: string = "";
   pos: Vector2 = v2(256, 550);
@@ -18,12 +22,25 @@ class Player {
 
 export class Lotus {
   get LIFE_MAX() { return 60 * 10; /* 10秒 */ }
-  constructor(p: Vector2, s: number) {
-    this._pos = p;
+  constructor(p0: Vector2, p1: Vector2 | null, f: number, s: number) {
+    console.log({ p0: p0, p1: p1, f: f, s: s });
+    this._p0 = p0;
+    this._p1 = p1 || p0;
+    this._f = f;
     this._scale = s;
     this._life = this.LIFE_MAX;
+    this.update();
   }
-  _pos: Vector2;
+  update() {
+    ++this._t;
+    const d = Math.sin(this._t * this._f) / 2 + 0.5;
+    this._pos = internalDivision(this._p0, this._p1, d);
+  }
+  _p0: Vector2;
+  _p1: Vector2;
+  _f: number;
+  _pos: Vector2 = v2(0, 0);
+  _t: number = 0;
   _scale: number;
   _life: number;
   z: number = 0;
@@ -50,15 +67,17 @@ export class Model {
   lotuses: Lotus[];
   constructor() {
     this.rng = new Rng(0);
-    this.lotuses = [new Lotus(v2(256, 700), 3.5)];
     for (let i = 0; i < 8; ++i) {
       this.arrowsX.push(this.rng.plusMinusF(Math.PI));
     }
+    this.lotuses = [new Lotus(v2(256, 700), null, 1, 3.5)];
     for (let i = 0; i < 40; ++i) {
-      const x = 256 + this.rng.plusMinusF(200);
-      const y = 400 - i * 100 + this.rng.plusMinusF(30);;
+      const x0 = 256 + this.rng.plusMinusF(200);
+      const y0 = 400 - i * 100 + this.rng.plusMinusF(30);;
+      const x1 = 256 + this.rng.plusMinusF(200);
+      const y1 = 400 - i * 100 + this.rng.plusMinusF(150);;
       const s = 1.7 + this.rng.plusMinusF(0.5);
-      this.lotuses.push(new Lotus(v2(x, y), s));
+      this.lotuses.push(new Lotus(v2(x0, y0), v2(x1, y1), 0.01, s));
     }
   }
   pointerup() { }
@@ -71,7 +90,6 @@ export class Model {
     }
     console.log(this.arrowAngle(i));
   }
-  updateLotuses() { }
 
   get lotusPlayerIsOn(): (Lotus | null) {
     for (let lo of this.lotuses) {
@@ -79,7 +97,12 @@ export class Model {
     }
     return null;
   }
-  updatePlayer() {
+  updateLotuses() {
+    for (const lotus of this.lotuses) {
+      lotus.update();
+    }
+  }
+  updateWorld() {
     if (0 < this.player.z) {
       console.log(`Jumping: z=${this.player.z}`)
       this.player.z += this.player.zVel;
@@ -89,11 +112,18 @@ export class Model {
       this.player.pos.y += Math.sin(t) * this.player.vel;
     } else {
       const lotus = this.lotusPlayerIsOn;
+      const oldLotusPos = lotus?.pos
+      this.updateLotuses();
+      const newLotusPos = lotus?.pos
       if (lotus) {
         if (lotus.isLiving) {
           lotus.decHP();
           console.log(`Waiting: z=${this.player.z}`)
           this.player.z = 0;
+          if (oldLotusPos && newLotusPos) {
+            this.player.pos.x += newLotusPos.x - oldLotusPos.x;
+            this.player.pos.y += newLotusPos.y - oldLotusPos.y;
+          }
           this.player.zVel = 0;
         } else {
           console.log(`Falling with lotus: z=${this.player.z}`)

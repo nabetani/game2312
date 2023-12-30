@@ -93,7 +93,7 @@ export class GameMain extends BaseScene {
   }
   updatePlayer() {
     const m = this.model;
-    m.updatePlayer();
+    m.updateWorld();
     const p = m.player;
     this.sprites.p0.setPosition(p.pos.x, PY);
     this.sprites.p0.setAngle(p.angle);
@@ -125,7 +125,6 @@ export class GameMain extends BaseScene {
   updateLotuses() {
     const m = this.model;
     const dy = PY - m.player.pos.y;
-    m.updateLotuses();
     this.drawLotusGauge(m.lotusPlayerIsOn);
     for (let i = 0; i < m.lotuses.length; i++) {
       const o = this.model.lotuses[i];
