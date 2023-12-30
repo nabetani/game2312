@@ -103,7 +103,7 @@ export class GameMain extends BaseScene {
     const p = lotus ? this.dispPos(this.model, lotus.pos) : null;
     for (let i = 0; i < GAGE_COUNT; ++i) {
       const g = this.gages[i];
-      if (lotus && lotus.life < i / GAGE_COUNT) {
+      if (lotus && 0 <= lotus.z && lotus.life < i / GAGE_COUNT) {
         const t = i * Math.PI * 2 / GAGE_COUNT;
         const x = p!.x + r! * Math.cos(t);
         const y = p!.y + r! * Math.sin(t);
