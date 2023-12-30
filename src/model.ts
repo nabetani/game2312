@@ -18,6 +18,7 @@ class Player {
   z: number = 0;
   zVel: number = 0;
   angle: number = 0;
+  isFalling: boolean = false;
 };
 
 export class Lotus {
@@ -71,14 +72,35 @@ export class Model {
       this.arrowsX.push(this.rng.plusMinusF(Math.PI));
     }
     this.lotuses = [new Lotus(v2(256, 700), null, 1, 3.5)];
-    for (let i = 0; i < 40; ++i) {
-      const x0 = 256 + this.rng.plusMinusF(200);
-      const y0 = 400 - i * 100 + this.rng.plusMinusF(30);;
-      const x1 = 256 + this.rng.plusMinusF(200);
-      const y1 = 400 - i * 100 + this.rng.plusMinusF(150);;
-      const s = 1.7 + this.rng.plusMinusF(0.5);
-      this.lotuses.push(new Lotus(v2(x0, y0), v2(x1, y1), 0.01, s));
+    this.placeLotuses();
+  }
+  placeLotuses() {
+    type S = {
+      x: number;
+      y: number;
+      x1?: number;
+      y1?: number;
+      f: number;
+      s: number;
+    };
+    for (let ii of [
+      { x: 0, y: 0, f: 1, s: 2 },
+      { x: 150, y: 150, f: 1, s: 1.6 },
+      { x: 0, y: 300, f: 1, s: 2 },
+      { x: -150, y: 450, f: 1, s: 1.6 },
+      { x: -150, y: 630, x1: 150, f: 0.01, s: 1.6 },
+      { x: -150, y: 800, x1: 150, f: 0.0123, s: 1.4 },
+      { x: -150, y: 1000, y1: 1000 + 200, f: 0.0245, s: 2 },
+      { x: 150, y: 1000, y1: 1000 + 200, f: 0.0215, s: 1.4 },
+    ]) {
+      const i: S = ii;
+      const p0 = v2(256 + i.x, 400 - i.y);
+      const x1 = (i.x1 || i.x);
+      const y1 = (i.y1 || i.y);
+      const p1 = v2(256 + x1, 400 - y1);
+      this.lotuses.push(new Lotus(p0, p1, i.f, i.s));
     }
+
   }
   pointerup() { }
   pointerdown() { }
@@ -92,6 +114,7 @@ export class Model {
   }
 
   get lotusPlayerIsOn(): (Lotus | null) {
+    if (this.player.isFalling) { return null; }
     for (let lo of this.lotuses) {
       if (lo.hit(this.player.pos)) { return lo; }
     }
@@ -110,6 +133,7 @@ export class Model {
       const t = (this.player.angle - 90) * (Math.PI / 180);
       this.player.pos.x += Math.cos(t) * this.player.vel;
       this.player.pos.y += Math.sin(t) * this.player.vel;
+      this.updateLotuses();
     } else {
       const lotus = this.lotusPlayerIsOn;
       const oldLotusPos = lotus?.pos
@@ -135,6 +159,7 @@ export class Model {
         console.log(`Falling: z=${this.player.z}`)
         this.player.z += this.player.zVel;
         this.player.zVel -= 0.03
+        this.player.isFalling = true;
       }
     }
   }
