@@ -17,7 +17,7 @@ class Player {
 };
 
 export class Lotus {
-  get LIFE_MAX() { return 60 * 2; /* 2秒 */ }
+  get LIFE_MAX() { return 60 * 10; /* 10秒 */ }
   constructor(p: Vector2, s: number) {
     this._pos = p;
     this._scale = s;
@@ -41,8 +41,7 @@ export class Lotus {
 };
 
 export class Model {
-  arrowsX: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
-  arrowsV: number[] = [9e-2, 10e-2, 11e-2, 13e-2, 17e-2, 5.3e-2, 7e-2, 6.1e-2,];
+  arrowsX: number[] = [];
   arrowAngle(i: integer): number {
     return Math.sin(this.arrowsX[i]) * 90;
   }
@@ -52,10 +51,13 @@ export class Model {
   constructor() {
     this.rng = new Rng(0);
     this.lotuses = [new Lotus(v2(256, 700), 3.5)];
-    for (let i = 0; i < 20; ++i) {
+    for (let i = 0; i < 8; ++i) {
+      this.arrowsX.push(this.rng.plusMinusF(Math.PI));
+    }
+    for (let i = 0; i < 40; ++i) {
       const x = 256 + this.rng.plusMinusF(200);
-      const y = 400 - i * 200;
-      const s = 1.5 + this.rng.plusMinusF(0.7);
+      const y = 400 - i * 100 + this.rng.plusMinusF(30);;
+      const s = 1.7 + this.rng.plusMinusF(0.5);
       this.lotuses.push(new Lotus(v2(x, y), s));
     }
   }
@@ -106,9 +108,12 @@ export class Model {
       }
     }
   }
-  updateArrows() {
-    for (let i = 0; i < this.arrowsV.length; i++) {
-      this.arrowsX[i] += this.arrowsV[i] * 3 * 1e-1;
+  updateArrows(tick: integer) {
+    for (let i = 0; i < this.arrowsX.length; i++) {
+      const t0 = Math.pow(Math.PI * Math.SQRT1_2, i) % (Math.PI * 2);
+      const t = (tick * 2e-2 + t0) % (Math.PI * 2);
+      const v = Math.sin(t) * 2e-2 + 3e-2;
+      this.arrowsX[i] += v;
     }
   }
 }

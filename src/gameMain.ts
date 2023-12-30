@@ -31,11 +31,13 @@ class StartPhase {
 
 class GamePhase {
   scene: GameMain;
+  tick: integer = 0;
   constructor(scene: GameMain) {
     this.scene = scene;
   }
   progress(): Phase {
-    this.scene.updateArrows();
+    ++this.tick;
+    this.scene.updateArrows(this.tick);
     this.scene.updatePlayer();
     this.scene.updateLotuses();
     return this
@@ -136,8 +138,8 @@ export class GameMain extends BaseScene {
     }
   }
 
-  updateArrows() {
-    this.model.updateArrows();
+  updateArrows(tick: integer) {
+    this.model.updateArrows(tick);
     for (let i = 0; i < this.model.arrowsX.length; i++) {
       this.arrows[i].setAngle(this.model.arrowAngle(i));
     }
