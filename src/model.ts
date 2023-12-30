@@ -106,7 +106,7 @@ export class Model {
   }
   updateArrows() {
     for (let i = 0; i < this.arrowsV.length; i++) {
-      this.arrowsX[i] += this.arrowsV[i] * 1e-1;
+      this.arrowsX[i] += this.arrowsV[i] * 3 * 1e-1;
     }
   }
 }
