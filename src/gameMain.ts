@@ -76,7 +76,7 @@ export class GameMain extends BaseScene {
   create() {
     console.log("create GameMain")
     this.add.image(...this.canXY(0.5), 'bg').setDepth(depth.bg);
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 4; i++) {
       const x = ((i % 4) * 2 + 1) * 512 / 8;
       const y = 800 - Math.floor(i / 4) * 120;
       const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);;

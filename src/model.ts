@@ -68,7 +68,7 @@ export class Model {
   lotuses: Lotus[];
   constructor() {
     this.rng = new Rng(0);
-    for (let i = 0; i < 8; ++i) {
+    for (let i = 0; i < 4; ++i) {
       this.arrowsX.push(this.rng.plusMinusF(Math.PI));
     }
     this.lotuses = [new Lotus(v2(256, 700), null, 1, 3.5)];
@@ -80,7 +80,7 @@ export class Model {
       y: number;
       x1?: number;
       y1?: number;
-      f: number;
+      f?: number;
       s: number;
     };
     for (let ii of [
@@ -88,17 +88,21 @@ export class Model {
       { x: 150, y: 150, f: 1, s: 1.6 },
       { x: 0, y: 300, f: 1, s: 2 },
       { x: -150, y: 450, f: 1, s: 1.6 },
+
       { x: -150, y: 630, x1: 150, f: 0.01, s: 1.6 },
       { x: -150, y: 800, x1: 150, f: 0.0123, s: 1.4 },
+
       { x: -150, y: 1000, y1: 1000 + 200, f: 0.0245, s: 2 },
-      { x: 150, y: 1000, y1: 1000 + 200, f: 0.0215, s: 1.4 },
+      { x: 150, y: 1000, y1: 1000 + 250, f: 0.0261, s: 1.4 },
+
+      { x: 0, y: 1400, s: 2.5 },
     ]) {
       const i: S = ii;
       const p0 = v2(256 + i.x, 400 - i.y);
       const x1 = (i.x1 || i.x);
       const y1 = (i.y1 || i.y);
       const p1 = v2(256 + x1, 400 - y1);
-      this.lotuses.push(new Lotus(p0, p1, i.f, i.s));
+      this.lotuses.push(new Lotus(p0, p1, i.f || 0, i.s));
     }
 
   }
