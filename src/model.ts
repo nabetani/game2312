@@ -82,8 +82,10 @@ export class Model {
       f?: number;
       s: number;
     };
+    this.lotuses.push(new Lotus(v2(256, 700), null, 0, 3.5));
+    let ignore = 0;
+    let y0 = null;
     for (let ii of [
-      { x: 0, y: -300, s: 3.5 },
       { x: 0, y: 0, f: 1, s: 2 },
       { x: 150, y: 150, f: 1, s: 1.6 },
       { x: 0, y: 300, f: 1, s: 2 },
@@ -96,12 +98,23 @@ export class Model {
       { x: 150, y: 1000, y1: 1000 + 250, f: 0.0261, s: 1.4 },
 
       { x: 0, y: 1400, s: 2.5 },
+
+      { x: -150, y: 1550, x1: 150, y1: 1900, f: 0.0245, s: 1.5 },
+      { x: -150, y: 1900, s: 1.5 },
+      { x: 0, y: 2000, x1: 0, y1: 2500, f: 0.0245, s: 1 },
+
+      { x: 0, y: 2800, s: 3.5 },
     ]) {
       const i: S = ii;
-      const p0 = v2(256 + i.x, 400 - i.y);
+      if (0 < ignore) {
+        --ignore;
+        continue;
+      }
+      y0 = y0 == null ? i.y : y0;
+      const p0 = v2(256 + i.x, 350 - (i.y - y0));
       const x1 = (i.x1 || i.x);
       const y1 = (i.y1 || i.y);
-      const p1 = v2(256 + x1, 400 - y1);
+      const p1 = v2(256 + x1, 350 - (y1 - y0));
       this.lotuses.push(new Lotus(p0, p1, i.f || 0, i.s));
     }
 
