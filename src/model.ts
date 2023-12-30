@@ -14,7 +14,7 @@ const internalDivision = (p: Vector2, q: Vector2, d: number): Vector2 => {
 class Player {
   state: string = "";
   pos: Vector2 = v2(256, 550);
-  vel: number = 3;
+  vel: number = 4;
   z: number = 0;
   zVel: number = 0;
   angle: number = 0;
@@ -65,13 +65,12 @@ export class Model {
   }
   player: Player = new Player();
   rng: Rng;
-  lotuses: Lotus[];
+  lotuses: Lotus[] = [];
   constructor() {
     this.rng = new Rng(0);
     for (let i = 0; i < 4; ++i) {
       this.arrowsX.push(this.rng.plusMinusF(Math.PI));
     }
-    this.lotuses = [new Lotus(v2(256, 700), null, 1, 3.5)];
     this.placeLotuses();
   }
   placeLotuses() {
@@ -84,6 +83,7 @@ export class Model {
       s: number;
     };
     for (let ii of [
+      { x: 0, y: -300, s: 3.5 },
       { x: 0, y: 0, f: 1, s: 2 },
       { x: 150, y: 150, f: 1, s: 1.6 },
       { x: 0, y: 300, f: 1, s: 2 },
@@ -114,7 +114,7 @@ export class Model {
       this.player.z = 0.01;
       this.player.zVel = 1
     }
-    console.log(this.arrowAngle(i));
+    // console.log(this.arrowAngle(i));
   }
 
   get lotusPlayerIsOn(): (Lotus | null) {
@@ -131,7 +131,7 @@ export class Model {
   }
   updateWorld() {
     if (0 < this.player.z) {
-      console.log(`Jumping: z=${this.player.z}`)
+      // console.log(`Jumping: z=${this.player.z}`)
       this.player.z += this.player.zVel;
       this.player.zVel -= 0.03
       const t = (this.player.angle - 90) * (Math.PI / 180);
@@ -146,7 +146,7 @@ export class Model {
       if (lotus) {
         if (lotus.isLiving) {
           lotus.decHP();
-          console.log(`Waiting: z=${this.player.z}`)
+          // console.log(`Waiting: z=${this.player.z}`)
           this.player.z = 0;
           if (oldLotusPos && newLotusPos) {
             this.player.pos.x += newLotusPos.x - oldLotusPos.x;
@@ -154,13 +154,13 @@ export class Model {
           }
           this.player.zVel = 0;
         } else {
-          console.log(`Falling with lotus: z=${this.player.z}`)
+          // console.log(`Falling with lotus: z=${this.player.z}`)
           this.player.z += this.player.zVel;
           lotus.z = this.player.z;
           this.player.zVel -= 0.03
         }
       } else {
-        console.log(`Falling: z=${this.player.z}`)
+        // console.log(`Falling: z=${this.player.z}`)
         this.player.z += this.player.zVel;
         this.player.zVel -= 0.03
         this.player.isFalling = true;
