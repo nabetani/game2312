@@ -40,6 +40,7 @@ class GamePhase {
     this.scene.updateArrows(this.tick);
     this.scene.updatePlayer();
     this.scene.updateLotuses();
+    this.scene.updateBG();
     return this
   }
 }
@@ -58,6 +59,7 @@ export class GameMain extends BaseScene {
   arrows: Phaser.GameObjects.Sprite[] = [];
   gages: Phaser.GameObjects.Sprite[] = [];
   lotuses: Phaser.GameObjects.Sprite[] = [];
+  bg: Phaser.GameObjects.Image | null = null;
 
   constructor() {
     super("GameMain")
@@ -75,7 +77,7 @@ export class GameMain extends BaseScene {
   }
   create() {
     console.log("create GameMain")
-    this.add.image(...this.canXY(0.5), 'bg').setDepth(depth.bg);
+    this.bg = this.add.image(this.canXY(0.5)[0], 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
     for (let i = 0; i < 4; i++) {
       const x = ((i % 4) * 2 + 1) * 512 / 8;
       const y = 800 - Math.floor(i / 4) * 120;
@@ -116,10 +118,15 @@ export class GameMain extends BaseScene {
       }
     }
   }
+  dispPosY(m: Model, y: number): number {
+    return y + PY - m.player.pos.y;
+  }
 
   dispPos(m: Model, p: Phaser.Math.Vector2): Phaser.Math.Vector2 {
-    const dy = PY - m.player.pos.y;
-    return new Phaser.Math.Vector2(p.x, p.y + dy);
+    return new Phaser.Math.Vector2(p.x, this.dispPosY(m, p.y));
+  }
+  updateBG() {
+    this.bg?.setPosition(256, this.dispPosY(this.model, 1000));
   }
 
   updateLotuses() {
