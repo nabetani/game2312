@@ -9,6 +9,17 @@ const PY = 500; // プレイヤーの表示 Y 座標
 const GAGE_COUNT = 30;
 const ARROW_COUNT = 4;
 
+const formatNnumber = (v: number, len: integer, k: integer): string => {
+  const b = Math.pow(10, k);
+  let deca = Math.round(v * b);
+  let f = deca % b;
+  let fs = ("0".repeat(k) + `${f}`).slice(-k);
+  let i = (deca - f) / 100;
+  return (" ".repeat(len) + `${i}.${fs}`).slice(-len);
+
+
+}
+
 class GameOverPhase {
   scene: GameMain;
   tick: integer = 0;
@@ -74,6 +85,7 @@ class Texts {
   gameOver: Phaser.GameObjects.Text | null = null;
   restart: Phaser.GameObjects.Text | null = null;
   countDown: Phaser.GameObjects.Text | null = null;
+  record: Phaser.GameObjects.Text | null = null;
   static P = 1;
   static G = 2;
   static W = 4;
@@ -90,6 +102,10 @@ class Texts {
     this.countDown = g.addText(
       '',
       g.canX(0.5), g.canY(0.2), 0.5, { fontSize: "80px", fontStyle: "bold", backgroundColor: "black", color: "white" });
+    this.record = g.addText(
+      "hoge",
+      10, 10, 0, { fontFamily: "monospace", fontSize: "33px", color: "white", align: "right", backgroundColor: "#0006", padding: { x: 10, y: 10 } })
+    this.record.setOrigin(0, 0);
   }
 
   textType(n: string): integer {
@@ -97,6 +113,7 @@ class Texts {
       "gameOver": Texts.G | Texts.W,
       "restart": Texts.W,
       "countDown": Texts.P,
+      "record": Texts.P | Texts.G | Texts.W,
     }[n] || 0;
   }
   showTexts(sw: integer) {
@@ -127,6 +144,7 @@ export class GameMain extends BaseScene {
   lotuses: Phaser.GameObjects.Sprite[] = [];
   bg: Phaser.GameObjects.Image | null = null;
   texts: Texts = new Texts();
+  resText: string = "";
   constructor() {
     super("GameMain")
     this.model = new Model()
@@ -189,6 +207,14 @@ export class GameMain extends BaseScene {
     this.model = new Model();
   }
 
+  setRecord(s: number) {
+    const p = (550 - this.model.player.pos.y) / 200;
+    const t = formatNnumber(s, 7, 2) + " s";
+    const d = formatNnumber(p, 6, 2) + " m";
+    this.resText = `${t} / ${d}`
+    this.texts.record?.setText(`${t}  ${d}`);
+  }
+
   countDown(n: integer) {
     const secF = n / this.fps();
     const secI = Math.floor(secF);
@@ -196,6 +222,7 @@ export class GameMain extends BaseScene {
     if (secI == 3) {
       this.setPlayable(true);
     }
+    this.setRecord(Math.max(0, secF - 3));
     if (texts.length <= secI) {
       this.texts.countDown?.setVisible(false);
       return
