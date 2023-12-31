@@ -7,7 +7,7 @@ type Phase = StartPhase | GamePhase | GameOverPhase;
 const ZP = 1.12; // ジャンプや落下の拡大縮小係数
 const PY = 500; // プレイヤーの表示 Y 座標
 const GAGE_COUNT = 30;
-const ARROW_COUNT = 4;
+const ARROW_COUNT = 3;
 
 const formatNnumber = (v: number, len: integer, k: integer): string => {
   const b = Math.pow(10, k);
@@ -16,8 +16,6 @@ const formatNnumber = (v: number, len: integer, k: integer): string => {
   let fs = ("0".repeat(k) + `${f}`).slice(-k);
   let i = (deca - f) / 100;
   return (" ".repeat(len) + `${i}.${fs}`).slice(-len);
-
-
 }
 
 class GameOverPhase {
@@ -175,7 +173,8 @@ export class GameMain extends BaseScene {
     for (let i = 0; i < ARROW_COUNT; i++) {
       const x = (i * 2 + 1) * 512 / (ARROW_COUNT * 2);
       const y = 800;
-      const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);;
+      const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);
+      s.setScale(1.5 * Math.pow(0.6, ARROW_COUNT - 1 - i));
       this.arrows.push(s);
       s.setInteractive();
     }

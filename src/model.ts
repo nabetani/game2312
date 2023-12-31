@@ -3,6 +3,7 @@ import { Rng } from './rng';
 
 type Vector2 = Phaser.Math.Vector2;
 const Vector2 = Phaser.Math.Vector2;
+const ARROW_COUNT = 3;
 const v2 = (x: number, y: number): Vector2 => {
   return new Vector2(x, y);
 }
@@ -72,7 +73,7 @@ export class Model {
   lotuses: Lotus[] = [];
   constructor() {
     this.rng = new Rng(0);
-    for (let i = 0; i < 4; ++i) {
+    for (let i = 0; i < ARROW_COUNT; ++i) {
       this.arrowsX.push(this.rng.plusMinusF(Math.PI));
     }
     this.placeLotuses();
@@ -129,7 +130,7 @@ export class Model {
     if (this.player.z == 0) {
       this.player.angle = this.arrowAngle(i);
       this.player.z = 0.01;
-      this.player.zVel = 1
+      this.player.zVel = [0.5, 0.71, 1][i];
     }
     // console.log(this.arrowAngle(i));
   }
