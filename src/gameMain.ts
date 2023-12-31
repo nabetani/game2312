@@ -10,9 +10,22 @@ const GAGE_COUNT = 30;
 
 class GameOverPhase {
   scene: GameMain;
+  tick: integer = 0;
   constructor(scene: GameMain) {
     this.scene = scene;
     this.scene.showGameOver()
+  }
+  progress(): Phase {
+    ++this.tick;
+    return this.tick < 120 ? this : new WaitRestartPhase(this.scene);
+  }
+}
+
+class WaitRestartPhase {
+  scene: GameMain;
+  constructor(scene: GameMain) {
+    this.scene = scene;
+    this.scene.showRestart()
   }
   progress(): Phase {
     return this;
@@ -34,6 +47,7 @@ class GamePhase {
   tick: integer = 0;
   constructor(scene: GameMain) {
     this.scene = scene;
+    this.scene.startGame();
   }
   progress(): Phase {
     ++this.tick;
@@ -56,15 +70,44 @@ const depth = {
 
 class Texts {
   gameOver: Phaser.GameObjects.Text | null = null;
-  setPlaying() {
-    for (const t of [this.gameOver]) {
-      t?.setVisible(false);
+  restart: Phaser.GameObjects.Text | null = null;
+  static P = 1;
+  static G = 2;
+  static W = 4;
+
+  create(g: GameMain) {
+    this.gameOver = g.addText(
+      ' Game Over ',
+      g.canX(0.5), g.canY(0.4), 0.5, { fontSize: "70px", fontStyle: "bold", color: "white" });
+    this.gameOver.setDepth(depth.text);
+    this.restart = g.addText(
+      '\n   Click here to start game.   \n',
+      g.canX(0.5), g.canY(0.6), 0.5, { fontSize: "33px", fontStyle: "bold", backgroundColor: "#fff8" });
+    this.restart.setDepth(depth.text);
+    this.setPlaying();
+  }
+
+  textType(n: string): integer {
+    return {
+      "gameOver": Texts.G | Texts.W,
+      "restart": Texts.W,
+    }[n] || 0;
+  }
+  showTexts(sw: integer) {
+    for (const [k, v] of Object.entries(this)) {
+      const s = !!(this.textType(k) & sw);
+      console.log({ sw: sw, v: v, k: k, t: this.textType(k), s: s })
+      v?.setVisible(s);
     }
   }
+  setPlaying() {
+    this.showTexts(Texts.P);
+  }
   setGameOver() {
-    for (const t of [this.gameOver]) {
-      t?.setVisible(true);
-    }
+    this.showTexts(Texts.G);
+  }
+  setWaitRestart() {
+    this.showTexts(Texts.W);
   }
 }
 
@@ -107,11 +150,11 @@ export class GameMain extends BaseScene {
     }
     this.addSprite(-100, -100, "p0", "p0")
     this.sprites.p0.setDepth(depth.player);
-    this.texts.gameOver = this.addText(
-      ' Game Over ',
-      this.canX(0.5), this.canY(0.4), 0.5, { fontSize: "70px", fontStyle: "bold", color: "white" });
-    this.texts.gameOver.setDepth(depth.text);
-    this.texts.setPlaying();
+    this.texts.create(this);
+    this.texts.restart!.on('pointerdown', () => this.onRestart()).setInteractive();
+  }
+  onRestart() {
+    this.phase = new GamePhase(this);
   }
   get isGameOver() {
     return this.model.player.z < -40;
@@ -119,6 +162,14 @@ export class GameMain extends BaseScene {
   showGameOver() {
     this.texts.setGameOver();
   }
+  showRestart() {
+    this.texts.setWaitRestart();
+  }
+  startGame() {
+    this.texts.setPlaying();
+    this.model = new Model();
+  }
+
   updatePlayer() {
     const m = this.model;
     m.updateWorld();
