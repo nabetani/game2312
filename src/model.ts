@@ -23,13 +23,14 @@ class Player {
 
 export class Lotus {
   get LIFE_MAX() { return 60 * 10; /* 10秒 */ }
-  constructor(p0: Vector2, p1: Vector2 | null, f: number, s: number) {
+  constructor(p0: Vector2, p1: Vector2 | null, f: number, s: number, eternal: boolean = false) {
     console.log({ p0: p0, p1: p1, f: f, s: s });
     this._p0 = p0;
     this._p1 = p1 || p0;
     this._f = f;
     this._scale = s;
     this._life = this.LIFE_MAX;
+    this._eternal = eternal;
     this.update();
   }
   update() {
@@ -44,13 +45,16 @@ export class Lotus {
   _t: number = 0;
   _scale: number;
   _life: number;
+  _eternal: boolean;
   z: number = 0;
   get isLiving(): boolean { return 0 < this._life; }
   get pos(): Vector2 { return this._pos; }
   get scale(): number { return this._scale; }
   get radius(): number { return this.scale * 60; }
   get life(): number { return this._life / this.LIFE_MAX; }
-  decHP() { --this._life; }
+  decHP() {
+    if (!this._eternal) { --this._life; }
+  }
   hit(p: Vector2) {
     const d2 = this.pos.distanceSq(p);
     const r = this.radius;
@@ -82,7 +86,7 @@ export class Model {
       f?: number;
       s: number;
     };
-    this.lotuses.push(new Lotus(v2(256, 700), null, 0, 3.5));
+    this.lotuses.push(new Lotus(v2(256, 700), null, 0, 3.5, true));
     let ignore = 0;
     let y0 = null;
     for (let ii of [

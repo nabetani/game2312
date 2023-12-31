@@ -89,7 +89,7 @@ class Texts {
 
     this.countDown = g.addText(
       '',
-      g.canX(0.5), g.canY(0.2), 0.5, { fontSize: "40px", fontStyle: "bold", backgroundColor: "#fff8" });
+      g.canX(0.5), g.canY(0.2), 0.5, { fontSize: "80px", fontStyle: "bold", backgroundColor: "black", color: "white" });
   }
 
   textType(n: string): integer {
@@ -196,12 +196,15 @@ export class GameMain extends BaseScene {
     if (secI == 3) {
       this.setPlayable(true);
     }
-    if (texts.length <= secI) { return };
-    const frac = secF - secI;
-    const show = frac < 0.5 && secI < texts.length;
+    if (texts.length <= secI) {
+      this.texts.countDown?.setVisible(false);
+      return
+    };
+    const show = secI < 3 ? secF - secI < 0.5 : true;
     const text = show ? texts[secI] : "";
     this.texts.countDown?.setVisible(show);
-    this.texts.countDown?.setText(text);
+    const spaces = " ".repeat(20);
+    this.texts.countDown?.setText(spaces + text + spaces);
   }
 
   updatePlayer() {
