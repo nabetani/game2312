@@ -2,22 +2,22 @@ import * as Phaser from 'phaser';
 import { BaseScene, Audio } from './baseScene';
 import { Model, Lotus } from './model';
 
-/*
- 縦スクロール
- カエルジャンプ
- ジャンプする距離は、ボタンによる
- ジャンプする方向は、ボタンの向き
- ボタンはずっと向きを変えつづける。
- ボタンをクリックするとジャンプと同時にボタンが消滅。消滅分はすぐに供給される。
- カエルが着地した 蓮の葉（？）は、時間切れで水没。
- 距離がスコア。
- */
-
-type Phase = StartPhase | GamePhase;
+type Phase = StartPhase | GamePhase | GameOverPhase;
 
 const ZP = 1.12; // ジャンプや落下の拡大縮小係数
 const PY = 500; // プレイヤーの表示 Y 座標
 const GAGE_COUNT = 30;
+
+class GameOverPhase {
+  scene: GameMain;
+  constructor(scene: GameMain) {
+    this.scene = scene;
+    this.scene.showGameOver()
+  }
+  progress(): Phase {
+    return this;
+  }
+}
 
 class StartPhase {
   scene: GameMain;
@@ -41,17 +41,32 @@ class GamePhase {
     this.scene.updatePlayer();
     this.scene.updateLotuses();
     this.scene.updateBG();
-    return this
+    return this.scene.isGameOver ? new GameOverPhase(this.scene) : this
   }
 }
 
 const depth = {
   "bg": 0,
-  "lotus": 100,
-  "arrow": 200,
-  "gage": 201,
-  "player": 1000,
+  "lotus": 10,
+  "arrow": 20,
+  "gage": 21,
+  "player": 100,
+  "text": 200,
 };
+
+class Texts {
+  gameOver: Phaser.GameObjects.Text | null = null;
+  setPlaying() {
+    for (const t of [this.gameOver]) {
+      t?.setVisible(false);
+    }
+  }
+  setGameOver() {
+    for (const t of [this.gameOver]) {
+      t?.setVisible(true);
+    }
+  }
+}
 
 export class GameMain extends BaseScene {
   model: Model;
@@ -60,7 +75,7 @@ export class GameMain extends BaseScene {
   gages: Phaser.GameObjects.Sprite[] = [];
   lotuses: Phaser.GameObjects.Sprite[] = [];
   bg: Phaser.GameObjects.Image | null = null;
-
+  texts: Texts = new Texts();
   constructor() {
     super("GameMain")
     this.model = new Model()
@@ -92,6 +107,17 @@ export class GameMain extends BaseScene {
     }
     this.addSprite(-100, -100, "p0", "p0")
     this.sprites.p0.setDepth(depth.player);
+    this.texts.gameOver = this.addText(
+      ' Game Over ',
+      this.canX(0.5), this.canY(0.4), 0.5, { fontSize: "70px", fontStyle: "bold", color: "white" });
+    this.texts.gameOver.setDepth(depth.text);
+    this.texts.setPlaying();
+  }
+  get isGameOver() {
+    return this.model.player.z < -40;
+  }
+  showGameOver() {
+    this.texts.setGameOver();
   }
   updatePlayer() {
     const m = this.model;
