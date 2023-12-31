@@ -169,7 +169,7 @@ export class GameMain extends BaseScene {
   }
   create() {
     console.log("create GameMain")
-    this.bg = this.add.image(this.canXY(0.5)[0], 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
+    this.bg = this.add.image(this.canX(0.5), 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
     for (let i = 0; i < ARROW_COUNT; i++) {
       const x = (i * 2 + 1) * 512 / (ARROW_COUNT * 2);
       const y = 800;
@@ -237,7 +237,7 @@ export class GameMain extends BaseScene {
     const m = this.model;
     m.updateWorld();
     const p = m.player;
-    this.sprites.p0.setPosition(p.pos.x, PY);
+    this.sprites.p0.setPosition(p.pos.x, this.dispPosY(m, p.pos.y));
     this.sprites.p0.setAngle(p.angle);
     this.sprites.p0.setScale(Math.pow(ZP, p.z));
   }
@@ -260,7 +260,8 @@ export class GameMain extends BaseScene {
   }
 
   dispPosY(m: Model, y: number): number {
-    return y + PY - m.player.pos.y;
+    const y0 = Math.max(-2800, m.player.pos.y);
+    return y + PY - y0;
   }
 
   dispPos(m: Model, p: Phaser.Math.Vector2): Phaser.Math.Vector2 {
@@ -273,16 +274,15 @@ export class GameMain extends BaseScene {
 
   updateLotuses() {
     const m = this.model;
-    const dy = PY - m.player.pos.y;
     this.drawLotusGauge(m.lotusPlayerIsOn);
     for (let i = 0; i < m.lotuses.length; i++) {
       const o = this.model.lotuses[i];
       if (this.lotuses.length <= i) {
-        this.lotuses.push(this.add.sprite(o.pos.x, dy + o.pos.y, "lotus").setDepth(depth.lotus));
+        this.lotuses.push(this.add.sprite(o.pos.x, this.dispPosY(m, o.pos.y), "lotus").setDepth(depth.lotus));
       }
       const s = this.lotuses[i];
       s.setScale(o.scale * Math.pow(ZP, o.z));
-      s.setPosition(o.pos.x, dy + o.pos.y);
+      s.setPosition(o.pos.x, this.dispPosY(m, o.pos.y));
     }
   }
 

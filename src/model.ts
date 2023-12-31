@@ -106,9 +106,9 @@ export class Model {
 
       { x: -150, y: 1550, x1: 150, y1: 1900, f: 0.0245, s: 1.5 },
       { x: -150, y: 1900, s: 1.5 },
-      { x: 0, y: 2000, x1: 0, y1: 2500, f: 0.0245, s: 1 },
+      { x: 0, y: 2000, x1: 0, y1: 3200, f: 0.0245, s: 1 },
 
-      { x: 0, y: 2800, s: 3.5 },
+      { x: 0, y: 3400, s: 3.5 },
     ]) {
       const i: S = ii;
       if (0 < ignore) {
@@ -130,7 +130,7 @@ export class Model {
     if (this.player.z == 0) {
       this.player.angle = this.arrowAngle(i);
       this.player.z = 0.01;
-      this.player.zVel = [0.5, 0.71, 1][i];
+      this.player.zVel = [0.36, 0.6, 1][i];
     }
     // console.log(this.arrowAngle(i));
   }
