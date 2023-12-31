@@ -72,9 +72,11 @@ class GamePhase {
 
 const depth = {
   "bg": 0,
-  "lotus": 10,
-  "arrow": 20,
+  "fallingL": 10,
+  "fallingP": 11,
+  "lotus": 20,
   "gage": 21,
+  "arrow": 30,
   "player": 100,
   "text": 200,
 };
@@ -162,6 +164,8 @@ export class GameMain extends BaseScene {
       const a = this.arrows[i];
       if (p) {
         a.on('pointerdown', () => { this.model.arrowClick(i); });
+        this.model.player.pos.y = 400 - 1900;
+        this.model.player.pos.x = 100;
       } else {
         a.removeAllListeners();
       }
@@ -237,9 +241,11 @@ export class GameMain extends BaseScene {
     const m = this.model;
     m.updateWorld();
     const p = m.player;
-    this.sprites.p0.setPosition(p.pos.x, this.dispPosY(m, p.pos.y));
-    this.sprites.p0.setAngle(p.angle);
-    this.sprites.p0.setScale(Math.pow(ZP, p.z));
+    const sp = this.sprites.p0
+    sp.setPosition(p.pos.x, this.dispPosY(m, p.pos.y));
+    sp.setAngle(p.angle);
+    sp.setScale(Math.pow(ZP, p.z));
+    sp.setDepth(0 <= p.z ? depth.player : depth.fallingP);
   }
 
   drawLotusGauge(lotus: Lotus | null) {
@@ -283,6 +289,7 @@ export class GameMain extends BaseScene {
       const s = this.lotuses[i];
       s.setScale(o.scale * Math.pow(ZP, o.z));
       s.setPosition(o.pos.x, this.dispPosY(m, o.pos.y));
+      s.setDepth(0 <= o.z ? depth.lotus : depth.fallingL);
     }
   }
 
