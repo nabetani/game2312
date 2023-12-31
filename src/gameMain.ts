@@ -7,6 +7,7 @@ type Phase = StartPhase | GamePhase | GameOverPhase;
 const ZP = 1.12; // ジャンプや落下の拡大縮小係数
 const PY = 500; // プレイヤーの表示 Y 座標
 const GAGE_COUNT = 30;
+const ARROW_COUNT = 4;
 
 class GameOverPhase {
   scene: GameMain;
@@ -51,6 +52,7 @@ class GamePhase {
   }
   progress(): Phase {
     ++this.tick;
+    this.scene.countDown(this.tick);
     this.scene.updateArrows(this.tick);
     this.scene.updatePlayer();
     this.scene.updateLotuses();
@@ -71,6 +73,7 @@ const depth = {
 class Texts {
   gameOver: Phaser.GameObjects.Text | null = null;
   restart: Phaser.GameObjects.Text | null = null;
+  countDown: Phaser.GameObjects.Text | null = null;
   static P = 1;
   static G = 2;
   static W = 4;
@@ -79,18 +82,21 @@ class Texts {
     this.gameOver = g.addText(
       ' Game Over ',
       g.canX(0.5), g.canY(0.4), 0.5, { fontSize: "70px", fontStyle: "bold", color: "white" });
-    this.gameOver.setDepth(depth.text);
+
     this.restart = g.addText(
       '\n   Click here to start game.   \n',
       g.canX(0.5), g.canY(0.6), 0.5, { fontSize: "33px", fontStyle: "bold", backgroundColor: "#fff8" });
-    this.restart.setDepth(depth.text);
-    this.setPlaying();
+
+    this.countDown = g.addText(
+      '',
+      g.canX(0.5), g.canY(0.2), 0.5, { fontSize: "40px", fontStyle: "bold", backgroundColor: "#fff8" });
   }
 
   textType(n: string): integer {
     return {
       "gameOver": Texts.G | Texts.W,
       "restart": Texts.W,
+      "countDown": Texts.P,
     }[n] || 0;
   }
   showTexts(sw: integer) {
@@ -98,6 +104,8 @@ class Texts {
       const s = !!(this.textType(k) & sw);
       console.log({ sw: sw, v: v, k: k, t: this.textType(k), s: s })
       v?.setVisible(s);
+      v?.setDepth(depth.text);
+
     }
   }
   setPlaying() {
@@ -133,15 +141,25 @@ export class GameMain extends BaseScene {
       gage: "lotus.webp",
     });
   }
+  setPlayable(p: boolean) {
+    for (let i = 0; i < ARROW_COUNT; i++) {
+      const a = this.arrows[i];
+      if (p) {
+        a.on('pointerdown', () => { this.model.arrowClick(i); });
+      } else {
+        a.removeAllListeners();
+      }
+    }
+  }
   create() {
     console.log("create GameMain")
     this.bg = this.add.image(this.canXY(0.5)[0], 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
-    for (let i = 0; i < 4; i++) {
-      const x = ((i % 4) * 2 + 1) * 512 / 8;
-      const y = 800 - Math.floor(i / 4) * 120;
+    for (let i = 0; i < ARROW_COUNT; i++) {
+      const x = (i * 2 + 1) * 512 / (ARROW_COUNT * 2);
+      const y = 800;
       const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);;
       this.arrows.push(s);
-      s.on('pointerdown', () => { this.model.arrowClick(i); }).setInteractive();
+      s.setInteractive();
     }
     for (let i = 0; i < GAGE_COUNT; ++i) {
       const s = this.add.sprite(0, 0, "gage").setDepth(depth.gage);;
@@ -167,7 +185,23 @@ export class GameMain extends BaseScene {
   }
   startGame() {
     this.texts.setPlaying();
+    this.setPlayable(false);
     this.model = new Model();
+  }
+
+  countDown(n: integer) {
+    const secF = n / this.fps();
+    const secI = Math.floor(secF);
+    const texts = ["3", "2", "1", "GO!"];
+    if (secI == 3) {
+      this.setPlayable(true);
+    }
+    if (texts.length <= secI) { return };
+    const frac = secF - secI;
+    const show = frac < 0.5 && secI < texts.length;
+    const text = show ? texts[secI] : "";
+    this.texts.countDown?.setVisible(show);
+    this.texts.countDown?.setText(text);
   }
 
   updatePlayer() {
@@ -195,6 +229,7 @@ export class GameMain extends BaseScene {
       }
     }
   }
+
   dispPosY(m: Model, y: number): number {
     return y + PY - m.player.pos.y;
   }
@@ -202,6 +237,7 @@ export class GameMain extends BaseScene {
   dispPos(m: Model, p: Phaser.Math.Vector2): Phaser.Math.Vector2 {
     return new Phaser.Math.Vector2(p.x, this.dispPosY(m, p.y));
   }
+
   updateBG() {
     this.bg?.setPosition(256, this.dispPosY(this.model, 1000));
   }
