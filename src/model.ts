@@ -47,7 +47,10 @@ export class Lotus {
   _scale: number;
   _life: number;
   _eternal: boolean;
+  _goal: boolean = false;
   z: number = 0;
+  setGoal(g: boolean) { this._goal = g; }
+  get isGoal(): boolean { return this._goal; }
   get isLiving(): boolean { return 0 < this._life; }
   get pos(): Vector2 { return this._pos; }
   get scale(): number { return this._scale; }
@@ -78,6 +81,11 @@ export class Model {
     }
     this.placeLotuses();
   }
+
+  get goaledIn(): boolean {
+    return !!(this.lotusPlayerIsOn?.isGoal && this.player.z == 0);
+  }
+
   placeLotuses() {
     type S = {
       x: number;
@@ -106,7 +114,7 @@ export class Model {
 
       { x: -150, y: 1550, x1: 150, y1: 1900, f: 0.0245, s: 1.5 },
       { x: -150, y: 1900, s: 1.5 },
-      { x: 0, y: 2000, x1: 0, y1: 3200, f: 0.0245, s: 1 },
+      { x: 0, y: 2050, x1: 0, y1: 3100, f: 0.0245, s: 2 },
 
       { x: 0, y: 3400, s: 3.5 },
     ]) {
@@ -122,7 +130,7 @@ export class Model {
       const p1 = v2(256 + x1, 350 - (y1 - y0));
       this.lotuses.push(new Lotus(p0, p1, i.f || 0, i.s));
     }
-
+    this.lotuses.at(-1)!.setGoal(true);
   }
   pointerup() { }
   pointerdown() { }

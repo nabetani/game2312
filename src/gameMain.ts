@@ -18,6 +18,19 @@ const formatNnumber = (v: number, len: integer, k: integer): string => {
   return (" ".repeat(len) + `${i}.${fs}`).slice(-len);
 }
 
+const ranks = [
+  { t: 240, n: "Apprentice" },
+  { t: 120, n: "Good Player" },
+  { t: 90, n: "Very Good Player" },
+  { t: 60, n: "Expert Player" },
+  { t: 40, n: "Advanced Player" },
+  { t: 30, n: "Incredible Player" },
+  { t: 25, n: "Master" },
+  { t: 20, n: "Hero" },
+  { t: 15, n: "Super Hero" },
+  { t: 0, n: "Beyond Human Being" },
+];
+
 class GameOverPhase {
   scene: GameMain;
   tick: integer = 0;
@@ -61,11 +74,11 @@ class GamePhase {
   }
   progress(): Phase {
     ++this.tick;
-    this.scene.countDown(this.tick);
     this.scene.updateArrows(this.tick);
     this.scene.updatePlayer();
     this.scene.updateLotuses();
     this.scene.updateBG();
+    this.scene.countDown(this.tick);
     return this.scene.isGameOver ? new GameOverPhase(this.scene) : this
   }
 }
@@ -79,6 +92,7 @@ const depth = {
   "arrow": 30,
   "player": 100,
   "text": 200,
+  "gameOverUI": 200,
 };
 
 class Texts {
@@ -86,18 +100,28 @@ class Texts {
   restart: Phaser.GameObjects.Text | null = null;
   countDown: Phaser.GameObjects.Text | null = null;
   record: Phaser.GameObjects.Text | null = null;
+  rankHead: Phaser.GameObjects.Text | null = null;
+  rank: Phaser.GameObjects.Text | null = null;
   static P = 1;
   static G = 2;
   static W = 4;
+  static R = 8;
 
   create(g: GameMain) {
     this.gameOver = g.addText(
       ' Game Over ',
-      g.canX(0.5), g.canY(0.4), 0.5, { fontSize: "70px", fontStyle: "bold", color: "white" });
+      g.canX(0.5), g.canY(0.4), 0.5, { fontSize: "45px", fontStyle: "bold", color: "white" });
+
+    this.rankHead = g.addText(
+      'Your class is',
+      g.canX(0.5), g.canY(0.5), 0.5, { fontSize: "33px", color: "white" });
+    this.rank = g.addText(
+      '',
+      g.canX(0.5), g.canY(0.55), 0.5, { fontSize: "40px", fontStyle: "bold", color: "white" });
 
     this.restart = g.addText(
-      '\n   Click here to start game.   \n',
-      g.canX(0.5), g.canY(0.6), 0.5, { fontSize: "33px", fontStyle: "bold", backgroundColor: "#fff8" });
+      '\n   Click here to try again   \n',
+      g.canX(0.5), g.canY(0.75), 0.5, { fontSize: "33px", fontStyle: "bold", backgroundColor: "#fff8" });
 
     this.countDown = g.addText(
       '',
@@ -112,6 +136,8 @@ class Texts {
     return {
       "gameOver": Texts.G | Texts.W,
       "restart": Texts.W,
+      "rankHead": Texts.R,
+      "rank": Texts.R,
       "countDown": Texts.P,
       "record": Texts.P | Texts.G | Texts.W,
     }[n] || 0;
@@ -119,7 +145,7 @@ class Texts {
   showTexts(sw: integer) {
     for (const [k, v] of Object.entries(this)) {
       const s = !!(this.textType(k) & sw);
-      console.log({ sw: sw, v: v, k: k, t: this.textType(k), s: s })
+      // console.log({ sw: sw, v: v, k: k, t: this.textType(k), s: s })
       v?.setVisible(s);
       v?.setDepth(depth.text);
 
@@ -128,11 +154,11 @@ class Texts {
   setPlaying() {
     this.showTexts(Texts.P);
   }
-  setGameOver() {
-    this.showTexts(Texts.G);
+  setGameOver(showRank: boolean) {
+    this.showTexts(Texts.G | (showRank ? Texts.R : 0));
   }
-  setWaitRestart() {
-    this.showTexts(Texts.W);
+  setWaitRestart(showRank: boolean) {
+    this.showTexts(Texts.W | (showRank ? Texts.R : 0));
   }
 }
 
@@ -145,6 +171,7 @@ export class GameMain extends BaseScene {
   bg: Phaser.GameObjects.Image | null = null;
   texts: Texts = new Texts();
   resText: string = "";
+  resTime: number | null = null;
   constructor() {
     super("GameMain")
     this.model = new Model()
@@ -157,6 +184,7 @@ export class GameMain extends BaseScene {
       p1: "p1.webp",
       lotus: "lotus.webp",
       gage: "lotus.webp",
+      share: "share.webp",
     });
   }
   setPlayable(p: boolean) {
@@ -164,6 +192,7 @@ export class GameMain extends BaseScene {
       const a = this.arrows[i];
       if (p) {
         a.on('pointerdown', () => { this.model.arrowClick(i); });
+        // DEBUG CODE
         this.model.player.pos.y = 400 - 1900;
         this.model.player.pos.x = 100;
       } else {
@@ -187,24 +216,64 @@ export class GameMain extends BaseScene {
       s.setScale(1 / 8);
       this.gages.push(s);
     }
-    this.addSprite(-100, -100, "p0", "p0")
+    this.addSprite(-100, -100, "p0", "p0");
     this.sprites.p0.setDepth(depth.player);
+    this.addSprite(this.canX(0.75), this.canY(0.9), "share", "share");
+    this.sprites
+      .share.on('pointerdown', () => this.shareClicked())
+      .setVisible(false)
+      .setDepth(depth.gameOverUI)
+      .setInteractive();
     this.texts.create(this);
     this.texts.restart!.on('pointerdown', () => this.onRestart()).setInteractive();
   }
+  rankText(): string | null {
+    if (null == this.resTime) {
+      return null;
+    }
+    for (const r of ranks) {
+      if (r.t < this.resTime) {
+        return r.n
+      }
+    }
+    return ""; // unreachable
+  }
+  shareClicked() {
+    const s = this.rankText();
+    const text = [
+      "Record: " + (this.resText == "" ? "??" : this.resText),
+      ...(s ? ["Class: " + s] : []),
+      "#DragonTights",
+      "https://nabetani.sakura.ne.jp/game2401/",
+    ].join("\n");
+    const encoded = encodeURIComponent(text);
+    const url = "https://taittsuu.com/share?text=" + encoded;
+    if (!window.open(url)) {
+      location.href = url;
+    }
+  }
+
   onRestart() {
     this.phase = new GamePhase(this);
   }
   get isGameOver() {
+    if (this.model.goaledIn) {
+      return true;
+    }
     return this.model.player.z < -40;
   }
   showGameOver() {
-    this.texts.setGameOver();
+    this.texts.gameOver?.setText(this.model.goaledIn ? "CONGRATULATIONS!" : "Game Over")
+    const s = this.rankText()
+    this.texts.rank?.setText(s || "");
+    this.texts.setGameOver(this.model.goaledIn);
   }
   showRestart() {
-    this.texts.setWaitRestart();
+    this.texts.setWaitRestart(this.model.goaledIn);
+    this.sprites.share.setVisible(true);
   }
   startGame() {
+    this.sprites.share.setVisible(false);
     this.texts.setPlaying();
     this.setPlayable(false);
     this.model = new Model();
@@ -213,8 +282,9 @@ export class GameMain extends BaseScene {
   setRecord(s: number) {
     const p = (550 - this.model.player.pos.y) / 200;
     const t = formatNnumber(s, 7, 2) + " s";
-    const d = formatNnumber(p, 6, 2) + " m";
-    this.resText = `${t} / ${d}`
+    const d = this.model.goaledIn ? "GOAL!!" : formatNnumber(p, 6, 2) + " m";
+    this.resText = `${t.trim()} / ${d.trim()}`
+    this.resTime = this.model.goaledIn ? parseFloat(formatNnumber(s, 7, 2)) : null;
     this.texts.record?.setText(`${t}  ${d}`);
   }
 
