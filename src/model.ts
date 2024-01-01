@@ -67,6 +67,9 @@ export class Lotus {
 };
 
 export class Model {
+  _started: boolean = false;
+  tickForArrows: integer = 0;
+  get started() { return this._started; }
   arrowsX: number[] = [];
   arrowAngle(i: integer): number {
     return Math.sin(this.arrowsX[i]) * 90;
@@ -135,6 +138,7 @@ export class Model {
   pointerup() { }
   pointerdown() { }
   arrowClick(i: integer) {
+    this._started = true;
     if (this.player.z == 0) {
       this.player.angle = this.arrowAngle(i);
       this.player.z = 0.01;
@@ -193,10 +197,11 @@ export class Model {
       }
     }
   }
-  updateArrows(tick: integer) {
+  updateArrows() {
+    ++this.tickForArrows;
     for (let i = 0; i < this.arrowsX.length; i++) {
       const t0 = Math.pow(Math.PI * Math.SQRT1_2, i) % (Math.PI * 2);
-      const t = (tick * 2e-2 + t0) % (Math.PI * 2);
+      const t = (this.tickForArrows * 2e-2 + t0) % (Math.PI * 2);
       const v = Math.sin(t) * 2e-2 + 3e-2;
       this.arrowsX[i] += v;
     }

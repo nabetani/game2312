@@ -73,12 +73,14 @@ class GamePhase {
     this.scene.startGame();
   }
   progress(): Phase {
-    ++this.tick;
-    this.scene.updateArrows(this.tick);
+    if (this.scene.model.started) {
+      ++this.tick;
+    }
+    this.scene.updateArrows();
     this.scene.updatePlayer();
     this.scene.updateLotuses();
     this.scene.updateBG();
-    this.scene.countDown(this.tick);
+    this.scene.updateRecord(this.tick);
     return this.scene.isGameOver ? new GameOverPhase(this.scene) : this
   }
 }
@@ -98,7 +100,6 @@ const depth = {
 class Texts {
   gameOver: Phaser.GameObjects.Text | null = null;
   restart: Phaser.GameObjects.Text | null = null;
-  countDown: Phaser.GameObjects.Text | null = null;
   record: Phaser.GameObjects.Text | null = null;
   rankHead: Phaser.GameObjects.Text | null = null;
   rank: Phaser.GameObjects.Text | null = null;
@@ -123,9 +124,6 @@ class Texts {
       '\n   Click here to try again   \n',
       g.canX(0.5), g.canY(0.75), 0.5, { fontSize: "33px", fontStyle: "bold", backgroundColor: "#fff8" });
 
-    this.countDown = g.addText(
-      '',
-      g.canX(0.5), g.canY(0.2), 0.5, { fontSize: "80px", fontStyle: "bold", backgroundColor: "black", color: "white" });
     this.record = g.addText(
       "hoge",
       10, 10, 0, { fontFamily: "monospace", fontSize: "33px", color: "white", align: "right", backgroundColor: "#0006", padding: { x: 10, y: 10 } })
@@ -138,7 +136,6 @@ class Texts {
       "restart": Texts.W,
       "rankHead": Texts.R,
       "rank": Texts.R,
-      "countDown": Texts.P,
       "record": Texts.P | Texts.G | Texts.W,
     }[n] || 0;
   }
@@ -193,8 +190,8 @@ export class GameMain extends BaseScene {
       if (p) {
         a.on('pointerdown', () => { this.model.arrowClick(i); });
         // DEBUG CODE
-        this.model.player.pos.y = 400 - 1900;
-        this.model.player.pos.x = 100;
+        // this.model.player.pos.y = 400 - 1900;
+        // this.model.player.pos.x = 100;
       } else {
         a.removeAllListeners();
       }
@@ -277,6 +274,7 @@ export class GameMain extends BaseScene {
     this.texts.setPlaying();
     this.setPlayable(false);
     this.model = new Model();
+    this.setPlayable(true);
   }
 
   setRecord(s: number) {
@@ -288,23 +286,9 @@ export class GameMain extends BaseScene {
     this.texts.record?.setText(`${t}  ${d}`);
   }
 
-  countDown(n: integer) {
+  updateRecord(n: integer) {
     const secF = n / this.fps();
-    const secI = Math.floor(secF);
-    const texts = ["3", "2", "1", "GO!"];
-    if (secI == 3) {
-      this.setPlayable(true);
-    }
-    this.setRecord(Math.max(0, secF - 3));
-    if (texts.length <= secI) {
-      this.texts.countDown?.setVisible(false);
-      return
-    };
-    const show = secI < 3 ? secF - secI < 0.5 : true;
-    const text = show ? texts[secI] : "";
-    this.texts.countDown?.setVisible(show);
-    const spaces = " ".repeat(20);
-    this.texts.countDown?.setText(spaces + text + spaces);
+    this.setRecord(secF);
   }
 
   updatePlayer() {
@@ -363,8 +347,8 @@ export class GameMain extends BaseScene {
     }
   }
 
-  updateArrows(tick: integer) {
-    this.model.updateArrows(tick);
+  updateArrows() {
+    this.model.updateArrows();
     for (let i = 0; i < this.model.arrowsX.length; i++) {
       this.arrows[i].setAngle(this.model.arrowAngle(i));
     }
