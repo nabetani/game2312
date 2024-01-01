@@ -197,8 +197,8 @@ export class GameMain extends BaseScene {
       }
     }
   }
-  create() {
-    console.log("create GameMain")
+  create(data: { sound: boolean }) {
+    console.log({ msg: "create GameMain", data: data });
     this.bg = this.add.image(this.canX(0.5), 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
     for (let i = 0; i < ARROW_COUNT; i++) {
       const x = (i * 2 + 1) * 512 / (ARROW_COUNT * 2);
