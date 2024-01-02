@@ -183,6 +183,9 @@ export class GameMain extends BaseScene {
       gage: "lotus.webp",
       share: "share.webp",
     });
+    this.loadAudios({
+      bgm: "bgm.m4a"
+    });
   }
   setPlayable(p: boolean) {
     for (let i = 0; i < ARROW_COUNT; i++) {
@@ -199,6 +202,9 @@ export class GameMain extends BaseScene {
   }
   create(data: { sound: boolean }) {
     console.log({ msg: "create GameMain", data: data });
+    this.prepareSounds(data?.sound, {
+      bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
+    });
     this.bg = this.add.image(this.canX(0.5), 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
     for (let i = 0; i < ARROW_COUNT; i++) {
       const x = (i * 2 + 1) * 512 / (ARROW_COUNT * 2);
@@ -223,6 +229,7 @@ export class GameMain extends BaseScene {
       .setInteractive();
     this.texts.create(this);
     this.texts.restart!.on('pointerdown', () => this.onRestart()).setInteractive();
+
   }
   rankText(): string | null {
     if (null == this.resTime) {
@@ -275,6 +282,7 @@ export class GameMain extends BaseScene {
     this.setPlayable(false);
     this.model = new Model();
     this.setPlayable(true);
+    this.audios.bgm.play();
   }
 
   setRecord(s: number) {
