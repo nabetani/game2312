@@ -257,7 +257,7 @@ export class GameMain extends BaseScene {
       "Record: " + (this.resText == "" ? "??" : this.resText),
       ...(s ? ["Class: " + s] : []),
       "#DragonTights",
-      "https://nabetani.sakura.ne.jp/game2401/",
+      "https://nabetani.sakura.ne.jp/game24a/",
     ].join("\n");
     const encoded = encodeURIComponent(text);
     const url = "https://taittsuu.com/share?text=" + encoded;
