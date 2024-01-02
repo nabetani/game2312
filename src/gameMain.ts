@@ -7,7 +7,7 @@ type Phase = StartPhase | GamePhase | GameOverPhase;
 const ZP = 1.12; // ジャンプや落下の拡大縮小係数
 const PY = 500; // プレイヤーの表示 Y 座標
 const GAGE_COUNT = 30;
-const ARROW_COUNT = 3;
+const ARROW_COUNT = 6;
 
 const formatNnumber = (v: number, len: integer, k: integer): string => {
   const b = Math.pow(10, k);
@@ -200,20 +200,29 @@ export class GameMain extends BaseScene {
       }
     }
   }
+  createArrows() {
+    const R = 0.6;
+    const rsum = (1 + R * (1 + R)) * 2;
+    const ratio = this.sys.game.canvas.width / rsum;
+    let x = 0;
+    const y = 800;
+    for (let i = 0; i < ARROW_COUNT; i++) {
+      const size = ratio * Math.pow(R, 2 - Math.floor(i / 2));
+      x += size / 2;
+      const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);
+      x += size / 2;
+      s.setScale(size / 110);
+      this.arrows.push(s);
+      s.setInteractive();
+    }
+  }
   create(data: { sound: boolean }) {
     console.log({ msg: "create GameMain", data: data });
     this.prepareSounds(data?.sound, {
       bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
     });
     this.bg = this.add.image(this.canX(0.5), 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
-    for (let i = 0; i < ARROW_COUNT; i++) {
-      const x = (i * 2 + 1) * 512 / (ARROW_COUNT * 2);
-      const y = 800;
-      const s = this.add.sprite(x, y, "arrow").setDepth(depth.arrow);
-      s.setScale(1.5 * Math.pow(0.6, ARROW_COUNT - 1 - i));
-      this.arrows.push(s);
-      s.setInteractive();
-    }
+    this.createArrows();
     for (let i = 0; i < GAGE_COUNT; ++i) {
       const s = this.add.sprite(0, 0, "gage").setDepth(depth.gage);;
       s.setScale(1 / 8);

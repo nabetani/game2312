@@ -3,7 +3,7 @@ import { Rng } from './rng';
 
 type Vector2 = Phaser.Math.Vector2;
 const Vector2 = Phaser.Math.Vector2;
-const ARROW_COUNT = 3;
+const ARROW_COUNT = 6;
 const v2 = (x: number, y: number): Vector2 => {
   return new Vector2(x, y);
 }
@@ -142,7 +142,7 @@ export class Model {
     if (this.player.z == 0) {
       this.player.angle = this.arrowAngle(i);
       this.player.z = 0.01;
-      this.player.zVel = [0.36, 0.6, 1][i];
+      this.player.zVel = [0.36, 0.6, 1][Math.floor(i / 2)];
     }
     // console.log(this.arrowAngle(i));
   }
