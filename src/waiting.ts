@@ -13,7 +13,7 @@ export class Wating extends BaseScene {
   addLink(rx: number, ry: number, g: number, msg: string, url: string) {
     const text = this.addText(
       msg,
-      this.canX(rx), this.canY(ry), g, { fontSize: "20px", backgroundColor: "#fff8" });
+      this.canX(rx), this.canY(ry), g, { fontSize: "20px", backgroundColor: "#fff8", padding: { x: 3, y: 3 } });
     text.on('pointerdown', () => {
       window.location.href = url;
     });
@@ -48,14 +48,13 @@ export class Wating extends BaseScene {
     startText.on('pointerdown', () => {
       this.scene.start('GameMain', { sound: this.soundOn });
     });
-    let ry = 0.95;
-    const dry = 0.04;
-    this.addLink(0.96, ry, 1, "Source code and license", "https://github.com/nabetani/game2312/");
-    ry -= dry;
-    this.addLink(0.96, ry, 1, "制作ノート", "https://nabetani.hatenadiary.com/entry/2024/01/game2401");
-    ry -= dry;
-    this.addLink(0.96, ry, 1, "鍋谷武典 @ タイッツー", "https://taittsuu.com/users/nabetani");
-    ry -= dry;
-    this.addLink(0.96, ry, 1, " タイッツー #DragonTights", "https://taittsuu.com/search/taiitsus/hashtags?query=DragonTights");
+    [
+      ["Source code and license", "https://github.com/nabetani/game2312/"],
+      ["制作ノート", "https://nabetani.hatenadiary.com/entry/2024/01/game24a"],
+      ["鍋谷武典 @ タイッツー", "https://taittsuu.com/users/nabetani"],
+      ["タイッツー #DragonTights", "https://taittsuu.com/search/taiitsus/hashtags?query=DragonTights"],
+    ].forEach((e, ix) =>
+      this.addLink(0.96, 0.95 - ix * 0.04, 1, e[0], e[1])
+    )
   }
 }
