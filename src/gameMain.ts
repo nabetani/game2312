@@ -77,7 +77,7 @@ class GamePhase {
       ++this.tick;
     }
     this.scene.updateArrows();
-    this.scene.updatePlayer();
+    this.scene.updatePlayer(this.tick);
     this.scene.updateLotuses();
     this.scene.updateBG();
     this.scene.updateRecord(this.tick);
@@ -178,7 +178,8 @@ export class GameMain extends BaseScene {
       bg: "bg.webp",
       arrow: "arrow.webp",
       p0: "p0.webp",
-      p1: "p1.webp",
+      pjump0: "pjump0.webp",
+      pjump1: "pjump1.webp",
       lotus: "lotus.webp",
       gage: "lotus.webp",
       share: "share.webp",
@@ -228,7 +229,9 @@ export class GameMain extends BaseScene {
       s.setScale(1 / 8);
       this.gages.push(s);
     }
-    this.addSprite(-100, -100, "p0", "p0");
+    this.addSprite(0, -1000, "p0", "p0");
+    this.addSprite(0, -1000, "pjump0", "pjump0");
+    this.addSprite(0, -1000, "pjump1", "pjump1");
     this.sprites.p0.setDepth(depth.player);
     this.addSprite(this.canX(0.75), this.canY(0.9), "share", "share");
     this.sprites
@@ -308,11 +311,27 @@ export class GameMain extends BaseScene {
     this.setRecord(secF);
   }
 
-  updatePlayer() {
+  playerSprite(staying: boolean, tick: integer): Phaser.GameObjects.Sprite {
+    const sprites = [
+      this.sprites.pjump0,
+      this.sprites.pjump1,
+      this.sprites.p0
+    ];
+    const s = (() => {
+      if (staying) { return this.sprites.p0; }
+      return sprites[(tick & 4) == 0 ? 1 : 0];
+    })();
+    for (const e of sprites) {
+      e.setVisible(e == s);
+    }
+    return s;
+  }
+
+  updatePlayer(tick: integer) {
     const m = this.model;
     m.updateWorld();
     const p = m.player;
-    const sp = this.sprites.p0
+    const sp = this.playerSprite(m.playerIsOnLotus || p.isFalling, tick);
     sp.setPosition(p.pos.x, this.dispPosY(m, p.pos.y));
     sp.setAngle(p.angle);
     sp.setScale(Math.pow(ZP, p.z));

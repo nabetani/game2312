@@ -147,6 +147,11 @@ export class Model {
     // console.log(this.arrowAngle(i));
   }
 
+  get playerIsOnLotus(): boolean {
+    if (0 < this.player.z) { return false; }
+    const lotus = this.lotusPlayerIsOn;
+    return !!(lotus && lotus.isLiving);
+  }
   get lotusPlayerIsOn(): (Lotus | null) {
     if (this.player.isFalling) { return null; }
     for (let lo of this.lotuses) {
