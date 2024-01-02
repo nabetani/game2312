@@ -3,6 +3,7 @@ import { BaseScene } from './baseScene';
 
 export class Wating extends BaseScene {
   soundOn: boolean = false;
+  singleVisibles: { [key: string]: Phaser.GameObjects.Text } = {};
   constructor() { super("Wating") }
   preload() {
     this.loadImages({
@@ -16,6 +17,24 @@ export class Wating extends BaseScene {
       this.canX(rx), this.canY(ry), g, { fontSize: "20px", backgroundColor: "#fff8", padding: { x: 3, y: 3 } });
     text.on('pointerdown', () => {
       window.location.href = url;
+    });
+  }
+  addTextText(rx: number, ry: number, g: number, btnText: string, bStyle: Phaser.Types.GameObjects.Text.TextStyle, msg0: string, mStyle: Phaser.Types.GameObjects.Text.TextStyle) {
+    const text = this.addText(
+      btnText,
+      this.canX(rx), this.canY(ry), g,
+      { ...{ padding: { x: 3, y: 3 }, fontSize: "25px", backgroundColor: "#fff8" }, ...bStyle });
+    const msg = msg0.split("\n").map((e) => e.trim()).join("\n")
+    this.singleVisibles[btnText] = this.singleVisibles[btnText] || this.add.text(
+      this.canX(0.5), text.getBottomCenter().y! + 10, msg,
+      { ...{ color: "black", padding: { x: 3, y: 3 }, fontSize: "20px", backgroundColor: "#fff8", lineSpacing: 10 }, ...mStyle });
+    const longText = this.singleVisibles[btnText]
+    longText.setOrigin(0.5, 0).setVisible(false);
+    text.on('pointerdown', () => {
+      longText.setText(msg);
+      for (const [k, v] of Object.entries(this.singleVisibles)) {
+        v.setVisible(k == btnText);
+      }
     });
   }
   createSoundUI() {
@@ -56,5 +75,24 @@ export class Wating extends BaseScene {
     ].forEach((e, ix) =>
       this.addLink(0.96, 0.95 - ix * 0.04, 1, e[0], e[1])
     )
+    this.addTextText(
+      0.25, 0.5, 0.5,
+      "遊び方", {},
+      `画面下部の矢印を押すと、その方向にジャンプします。
+       左から順に、小小中中大大ジャンプです。
+       丸いものの上に着地できないとゲームオーバーです。
+       上の方にあるゴールを目指してください。`, {}
+    );
+    this.addTextText(
+      0.75, 0.5, 0.5,
+      "ストーリー", {},
+      `あなたはタイツです。
+       冒険の末、ついに龍の潜む天空の地につきました。
+       龍の頭のあたりにあるタイツソードを手に入れれば
+       魔王を倒せるはずです。
+       ジャンプ力を活かして龍の頭のあたりまで行き、
+       タイツソードを手に入れましょう。`,
+      { fixedWidth: 500, wordWrap: { width: 480, useAdvancedWrap: true } }
+    );
   }
 }
