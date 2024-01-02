@@ -23,7 +23,7 @@ class Player {
 };
 
 export class Lotus {
-  get LIFE_MAX() { return 60 * 10; /* 10秒 */ }
+  get LIFE_MAX() { return 60 * 30; /* 30秒 */ }
   constructor(p0: Vector2, p1: Vector2 | null, f: number, s: number, eternal: boolean = false) {
     console.log({ p0: p0, p1: p1, f: f, s: s });
     this._p0 = p0;
