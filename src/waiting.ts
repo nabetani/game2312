@@ -7,7 +7,7 @@ export class Wating extends BaseScene {
   constructor() { super("Wating") }
   preload() {
     this.loadImages({
-      bg: "bg.webp",
+      title: "title.webp",
       soundOn: "soundOn.webp", soundOff: "soundOff.webp"
     });
     this.loadAudios({
@@ -66,7 +66,7 @@ export class Wating extends BaseScene {
 
   create() {
     console.log("create Waiting")
-    this.add.image(this.canX(0.5), this.canY(0.5), 'bg');
+    this.add.image(this.canX(0.5), this.canY(0.5), 'title');
     this.prepareSounds(true, {
       notingame: new this.AddSound("notingame", { loop: true, volume: 0.4 }),
     });

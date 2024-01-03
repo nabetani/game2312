@@ -170,6 +170,10 @@ export class Model {
     for (let lo of this.lotuses) {
       if (lo.hit(this.player.pos)) { return lo; }
     }
+
+    // DEBUG CODE
+    // return this.lotuses[1];
+
     return null;
   }
   updateLotuses() {

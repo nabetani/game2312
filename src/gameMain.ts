@@ -165,7 +165,7 @@ export class GameMain extends BaseScene {
   arrows: Phaser.GameObjects.Sprite[] = [];
   gages: Phaser.GameObjects.Sprite[] = [];
   lotuses: Phaser.GameObjects.Sprite[] = [];
-  bg: Phaser.GameObjects.Image | null = null;
+  bg: Phaser.GameObjects.Image[] = [];
   texts: Texts = new Texts();
   resText: string = "";
   resTime: number | null = null;
@@ -175,7 +175,8 @@ export class GameMain extends BaseScene {
   }
   preload() {
     this.loadImages({
-      bg: "bg.webp",
+      bgL: "bgL.webp",
+      bgU: "bgU.webp",
       arrow: "arrow.webp",
       p0: "p0.webp",
       pjump0: "pjump0.webp",
@@ -235,7 +236,10 @@ export class GameMain extends BaseScene {
       gameover: "gameover",
       notingame: new this.AddSound("notingame", { loop: true, volume: 0.4 }),
     });
-    this.bg = this.add.image(this.canX(0.5), 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
+    this.bg = [
+      this.add.image(this.canX(0.5), 0, 'bgU').setDepth(depth.bg).setOrigin(0.5, 1),
+      this.add.image(this.canX(0.5), 0, 'bgL').setDepth(depth.bg).setOrigin(0.5, 1),
+    ];
     this.createArrows();
     for (let i = 0; i < GAGE_COUNT; ++i) {
       const s = this.add.sprite(0, 0, "gage").setDepth(depth.gage);;
@@ -389,7 +393,9 @@ export class GameMain extends BaseScene {
   }
 
   updateBG() {
-    this.bg?.setPosition(256, this.dispPosY(this.model, 1000));
+    const y = this.dispPosY(this.model, 1000);
+    this.bg[0].setPosition(256, y - 2100);
+    this.bg[1].setPosition(256, y);
   }
 
   updateLotuses() {
