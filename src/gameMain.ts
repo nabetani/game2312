@@ -185,14 +185,19 @@ export class GameMain extends BaseScene {
       share: "share.webp",
     });
     this.loadAudios({
-      bgm: "bgm.m4a"
+      bgm: "bgm.m4a",
+      jump: "jump.m4a",
     });
   }
   setPlayable(p: boolean) {
     for (let i = 0; i < ARROW_COUNT; i++) {
       const a = this.arrows[i];
       if (p) {
-        a.on('pointerdown', () => { this.model.arrowClick(i); });
+        a.on('pointerdown', () => {
+          if (this.model.arrowClick(i)) {
+            this.audios.jump.play();
+          }
+        });
         // DEBUG CODE
         // this.model.player.pos.y = 400 - 1900;
         // this.model.player.pos.x = 100;
@@ -221,6 +226,7 @@ export class GameMain extends BaseScene {
     console.log({ msg: "create GameMain", data: data });
     this.prepareSounds(data?.sound, {
       bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
+      jump: "jump",
     });
     this.bg = this.add.image(this.canX(0.5), 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
     this.createArrows();
@@ -332,6 +338,9 @@ export class GameMain extends BaseScene {
     m.updateWorld();
     const p = m.player;
     const sp = this.playerSprite(m.playerIsOnLotus || p.isFalling, tick);
+    if (m.playerIsOnLotus) {
+      this.audios.jump.stop();
+    }
     sp.setPosition(p.pos.x, this.dispPosY(m, p.pos.y));
     sp.setAngle(p.angle);
     sp.setScale(Math.pow(ZP, p.z));

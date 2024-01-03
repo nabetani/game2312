@@ -137,13 +137,15 @@ export class Model {
   }
   pointerup() { }
   pointerdown() { }
-  arrowClick(i: integer) {
+  arrowClick(i: integer): boolean {
     this._started = true;
-    if (this.player.z == 0) {
-      this.player.angle = this.arrowAngle(i);
-      this.player.z = 0.01;
-      this.player.zVel = [0.36, 0.6, 1][Math.floor(i / 2)];
+    if (this.player.z != 0) {
+      return false;
     }
+    this.player.angle = this.arrowAngle(i);
+    this.player.z = 0.01;
+    this.player.zVel = [0.36, 0.6, 1][Math.floor(i / 2)];
+    return true;
     // console.log(this.arrowAngle(i));
   }
 
