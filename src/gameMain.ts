@@ -187,6 +187,9 @@ export class GameMain extends BaseScene {
     this.loadAudios({
       bgm: "bgm.m4a",
       jump: "jump.m4a",
+      goal: "goal.m4a",
+      gameover: "gameover.m4a",
+      notingame: "notingame.m4a",
     });
   }
   setPlayable(p: boolean) {
@@ -227,6 +230,9 @@ export class GameMain extends BaseScene {
     this.prepareSounds(data?.sound, {
       bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
       jump: "jump",
+      goal: "goal",
+      gameover: "gameover",
+      notingame: new this.AddSound("notingame", { loop: true, volume: 0.4 }),
     });
     this.bg = this.add.image(this.canX(0.5), 0, 'bg').setDepth(depth.bg).setOrigin(0.5, 1);
     this.createArrows();
@@ -285,6 +291,12 @@ export class GameMain extends BaseScene {
     return this.model.player.z < -40;
   }
   showGameOver() {
+    this.audios.bgm.stop();
+    if (this.model.goaledIn) {
+      this.audios.goal.play();
+    } else {
+      this.audios.gameover.play();
+    }
     this.texts.gameOver?.setText(this.model.goaledIn ? "CONGRATULATIONS!" : "Game Over")
     const s = this.rankText()
     this.texts.rank?.setText(s || "");
@@ -293,6 +305,7 @@ export class GameMain extends BaseScene {
   showRestart() {
     this.texts.setWaitRestart(this.model.goaledIn);
     this.sprites.share.setVisible(true);
+    this.audios.notingame.play();
   }
   startGame() {
     this.sprites.share.setVisible(false);
@@ -300,6 +313,7 @@ export class GameMain extends BaseScene {
     this.setPlayable(false);
     this.model = new Model();
     this.setPlayable(true);
+    this.audios.notingame.stop();
     this.audios.bgm.play();
   }
 

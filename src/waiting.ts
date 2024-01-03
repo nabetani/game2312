@@ -10,6 +10,9 @@ export class Wating extends BaseScene {
       bg: "bg.webp",
       soundOn: "soundOn.webp", soundOff: "soundOff.webp"
     });
+    this.loadAudios({
+      notingame: "notingame.m4a",
+    });
   }
   addLink(rx: number, ry: number, g: number, msg: string, url: string) {
     const text = this.addText(
@@ -45,6 +48,11 @@ export class Wating extends BaseScene {
       const soundScale = 0.6;
       soundOn.setScale(on ? 1 : soundScale);
       soundOff.setScale(!on ? 1 : soundScale);
+      if (on) {
+        this.audios.notingame.play();
+      } else {
+        this.audios.notingame.stop();
+      }
     };
     setSound(false);
     const setSoundButton = (btn: Phaser.GameObjects.Sprite, on: boolean) => {
@@ -59,12 +67,16 @@ export class Wating extends BaseScene {
   create() {
     console.log("create Waiting")
     this.add.image(this.canX(0.5), this.canY(0.5), 'bg');
+    this.prepareSounds(true, {
+      notingame: new this.AddSound("notingame", { loop: true, volume: 0.4 }),
+    });
     this.createSoundUI();
 
     const startText = this.addText(
       '\n   Click here to start game.   \n',
       this.canX(0.5), this.canY(0.4), 0.5, { fontSize: "33px", fontStyle: "bold", backgroundColor: "#fff8" });
     startText.on('pointerdown', () => {
+      this.audios.notingame.stop();
       this.scene.start('GameMain', { sound: this.soundOn });
     });
     [
