@@ -13,10 +13,9 @@ const internalDivision = (p: Vector2, q: Vector2, d: number): Vector2 => {
     p.y * d + q.y * (1 - d));
 }
 class Player {
-  state: string = "";
   pos: Vector2 = v2(256, 550);
-  vel: number = 4;
   z: number = 0;
+  vel: Vector2 = v2(0, 0);
   zVel: number = 0;
   angle: number = 0;
   isFalling: boolean = false;
@@ -34,10 +33,18 @@ export class Lotus {
     this._eternal = eternal;
     this.update();
   }
+  get vel(): Vector2 {
+    const p1 = this.posAt(this._t);
+    const p0 = this.posAt(this._t - 1);
+    return v2(p1.x - p0.x, p1.y - p0.y);
+  }
+  posAt(t: number): Vector2 {
+    const d = Math.sin(t * this._f) / 2 + 0.5;
+    return internalDivision(this._p0, this._p1, d);
+  }
   update() {
     ++this._t;
-    const d = Math.sin(this._t * this._f) / 2 + 0.5;
-    this._pos = internalDivision(this._p0, this._p1, d);
+    this._pos = this.posAt(this._t);
   }
   _p0: Vector2;
   _p1: Vector2;
@@ -143,6 +150,10 @@ export class Model {
       return false;
     }
     this.player.angle = this.arrowAngle(i);
+    const t = (this.player.angle - 90) * (Math.PI / 180);
+    const v = 4;
+    const lv = this.lotusPlayerIsOn!.vel;
+    this.player.vel = v2(Math.cos(t) * v + lv.x, Math.sin(t) * v + lv.y);
     this.player.z = 0.01;
     this.player.zVel = [0.36, 0.6, 1][Math.floor(i / 2)];
     return true;
@@ -172,8 +183,8 @@ export class Model {
       this.player.z += this.player.zVel;
       this.player.zVel -= 0.03
       const t = (this.player.angle - 90) * (Math.PI / 180);
-      this.player.pos.x += Math.cos(t) * this.player.vel;
-      this.player.pos.y += Math.sin(t) * this.player.vel;
+      this.player.pos.x += this.player.vel.x;
+      this.player.pos.y += this.player.vel.y;
       this.updateLotuses();
     } else {
       const lotus = this.lotusPlayerIsOn;
@@ -209,7 +220,7 @@ export class Model {
     for (let i = 0; i < this.arrowsX.length; i++) {
       const t0 = Math.pow(Math.PI * Math.SQRT1_2, i) % (Math.PI * 2);
       const t = (this.tickForArrows * 2e-2 + t0) % (Math.PI * 2);
-      const v = Math.sin(t) * 2e-2 + 3e-2;
+      const v = (Math.sin(t) * 2e-2 + 3e-2) * 0.7;
       this.arrowsX[i] += v;
     }
   }
