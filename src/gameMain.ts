@@ -21,13 +21,13 @@ const formatNnumber = (v: number, len: integer, k: integer): string => {
 const ranks = [
   { t: 240, n: "Apprentice" },
   { t: 120, n: "Good Player" },
-  { t: 90, n: "Very Good Player" },
-  { t: 60, n: "Expert Player" },
-  { t: 40, n: "Advanced Player" },
-  { t: 30, n: "Incredible Player" },
-  { t: 25, n: "Master" },
-  { t: 20, n: "Hero" },
-  { t: 15, n: "Super Hero" },
+  { t: 100, n: "Very Good Player" },
+  { t: 90, n: "Expert Player" },
+  { t: 80, n: "Advanced Player" },
+  { t: 70, n: "Incredible Player" },
+  { t: 60, n: "Master" },
+  { t: 50, n: "Hero" },
+  { t: 40, n: "Super Hero" },
   { t: 0, n: "Beyond Human Being" },
 ];
 
@@ -181,6 +181,7 @@ export class GameMain extends BaseScene {
       pjump0: "pjump0.webp",
       pjump1: "pjump1.webp",
       lotus: "lotus.webp",
+      finalLotus: "finalLotus.webp",
       gage: "lotus.webp",
       share: "share.webp",
     });
@@ -397,7 +398,8 @@ export class GameMain extends BaseScene {
     for (let i = 0; i < m.lotuses.length; i++) {
       const o = this.model.lotuses[i];
       if (this.lotuses.length <= i) {
-        this.lotuses.push(this.add.sprite(o.pos.x, this.dispPosY(m, o.pos.y), "lotus").setDepth(depth.lotus));
+        const spName = o.isGoal ? "finalLotus" : "lotus";
+        this.lotuses.push(this.add.sprite(o.pos.x, this.dispPosY(m, o.pos.y), spName).setDepth(depth.lotus));
       }
       const s = this.lotuses[i];
       s.setScale(o.scale * Math.pow(ZP, o.z));
