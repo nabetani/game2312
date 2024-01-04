@@ -30,7 +30,7 @@ export class Wating extends BaseScene {
     const msg = msg0.split("\n").map((e) => e.trim()).join("\n")
     this.singleVisibles[btnText] = this.singleVisibles[btnText] || this.add.text(
       this.canX(0.5), text.getBottomCenter().y! + 10, msg,
-      { ...{ color: "black", padding: { x: 3, y: 3 }, fontSize: "20px", backgroundColor: "#fff8", lineSpacing: 10 }, ...mStyle });
+      { ...{ color: "black", padding: { x: 3, y: 3 }, fontSize: "19px", backgroundColor: "#fff8", lineSpacing: 10 }, ...mStyle });
     const longText = this.singleVisibles[btnText]
     longText.setOrigin(0.5, 0).setVisible(false);
     text.on('pointerdown', () => {
@@ -92,20 +92,21 @@ export class Wating extends BaseScene {
       "遊び方", {},
       `画面下部の矢印を押すと、その方向にジャンプします。
        矢印が大きいほど大きくジャンプします。
+       ※ 動いているものの上でジャンプすると、初速が その分加算されます。
        丸いものの上に着地できないとゲームオーバーです。
-       丸いものに長い間乗っていると、丸いものは壊れます。
-       上の方にあるゴールを目指してください。`, {}
+       丸いものに長い間乗っていると、丸いものは壊れ そのまま落ちでゲームオーバーです。
+       上の方にあるゴールを目指してください。`,
+      { fixedWidth: 510, wordWrap: { width: 480, useAdvancedWrap: true } }
     );
     this.addTextText(
       0.75, 0.5, 0.5,
       "ストーリー", {},
       `あなたはタイツです。
-       冒険の末、ついに龍の潜む天空につきました。
-       龍の頭のあたりにあるタイツソードを手に入れれば
-       魔王を倒せるはずです。
+       冒険の末、ついに龍の潜む天空にたどりつきました。
+       魔王を倒すには、龍の頭のあたりにあるタイツソードが必要です。
        ジャンプ力を活かして龍の頭のあたりまで行き、
        タイツソードを手に入れましょう。`,
-      { fixedWidth: 500, wordWrap: { width: 480, useAdvancedWrap: true } }
+      { fixedWidth: 510, wordWrap: { width: 480, useAdvancedWrap: true } }
     );
   }
 }
