@@ -231,10 +231,10 @@ export class GameMain extends BaseScene {
     console.log({ msg: "create GameMain", data: data });
     this.prepareSounds(data?.sound, {
       bgm: new this.AddSound("bgm", { loop: true, volume: 0.2 }),
-      jump: "jump",
+      jump: new this.AddSound("jump", { volume: 0.4 }),
       goal: "goal",
       gameover: "gameover",
-      notingame: new this.AddSound("notingame", { loop: true, volume: 0.4 }),
+      notingame: new this.AddSound("notingame", { loop: true, volume: 1.2 }),
     });
     this.bg = [
       this.add.image(this.canX(0.5), 0, 'bgU').setDepth(depth.bg).setOrigin(0.5, 1),

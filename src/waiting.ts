@@ -68,7 +68,7 @@ export class Wating extends BaseScene {
     console.log("create Waiting")
     this.add.image(this.canX(0.5), this.canY(0.5), 'title');
     this.prepareSounds(true, {
-      notingame: new this.AddSound("notingame", { loop: true, volume: 0.4 }),
+      notingame: new this.AddSound("notingame", { loop: true, volume: 1.2 }),
     });
     this.createSoundUI();
 
