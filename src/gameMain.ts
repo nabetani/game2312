@@ -21,13 +21,13 @@ const formatNnumber = (v: number, len: integer, k: integer): string => {
 const ranks = [
   { t: 240, n: "Apprentice" },
   { t: 120, n: "Good Player" },
-  { t: 100, n: "Very Good Player" },
-  { t: 90, n: "Expert Player" },
-  { t: 80, n: "Advanced Player" },
-  { t: 70, n: "Incredible Player" },
-  { t: 60, n: "Master" },
-  { t: 50, n: "Hero" },
-  { t: 40, n: "Super Hero" },
+  { t: 90, n: "Very Good Player" },
+  { t: 60, n: "Expert Player" },
+  { t: 50, n: "Advanced Player" },
+  { t: 45, n: "Incredible Player" },
+  { t: 40, n: "Master" },
+  { t: 35, n: "Hero" },
+  { t: 30, n: "Super Hero" },
   { t: 0, n: "Beyond Human Being" },
 ];
 
